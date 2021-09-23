@@ -4,5 +4,6 @@ interface AuthServices {
 }
 
 export default interface AppConfig {
+	title:string,
 	auth: AuthServices;
 }

@@ -1,14 +1,17 @@
 import Express from "express";
+import App from "./app";
+import admin from "firebase-admin";
 
 require("dotenv").config();
-import App from "./app";
+const port = process.env.PORT || 8080;
+const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT || "{}");
 
 const server = Express();
 
 const app = new App(server);
 
-const port = process.env.PORT || 8080;
-server.listen(port, () => {
+server.listen(port, async () => {
 	console.log(`listening on port ${port} `);
-	app.init();
+
+	app.init(admin.firestore());
 });

@@ -1,1 +1,3 @@
-export interface NotionRow {}
+import Task from "./task";
+
+export interface NotionRow extends Task {}

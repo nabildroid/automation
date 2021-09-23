@@ -1,1 +1,3 @@
-export default interface Task {}
+export default interface Task {
+    id:string;
+}
