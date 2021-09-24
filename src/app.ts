@@ -11,21 +11,33 @@ import Ticktick from "./repositories/ticktick";
 import Hello from "./routes/hello";
 import World from "./routes/world";
 
+type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
+
 export default class App {
-	db!: IFirestore;
+	private db!: IFirestore;
 	notion!: INotion;
 	ticktick!: ITicktick;
-	config!: AppConfig;
+	private config!: AppConfig;
 
 	constructor(server: Express) {
-		const hello: IRoute = new Hello(this);
-		const world: IRoute = new World(this);
-
-		server.get("/", hello.handler);
-		server.get("/world", world.handler);
+		this.configRoutes(server, [
+			["get", "/", new Hello(this)],
+			["get", "/world", new World(this)],
+		]);
 	}
 
-	async init(firestore: firestore.Firestore) {
+	private configRoutes(server: Express, routes: RouteConfig[]) {
+		routes.forEach((route) => {
+			const handler = route[2].handler.bind(route[2]);
+			if (route[0] == "get") {
+				server.get(route[1], handler);
+			} else if (route[0] == "post") {
+				server.post(route[1], handler);
+			}
+		});
+	}
+
+	async init(firestore: any) {
 		this.db = new Firestore(firestore);
 		this.config = await this.db.appConfig();
 		this.notion = new Notion(this.config.auth.notion);

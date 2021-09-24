@@ -1,15 +1,11 @@
 import IRoute from "../core/types/iroute";
 import { Request, Response } from "express";
-import INotion from "../repositories/contracts/iNotion";
+import IApp from "../core/contract/iapp";
 
-interface Dependencies  {
-	readonly notion:INotion;
-}
-export default class Hello implements IRoute,Dependencies {
-	readonly notion: INotion;
-	
-	constructor({notion}:Dependencies){
-		this.notion = notion;
+export default class Hello implements IRoute {
+	readonly app: IApp;
+	constructor(app: IApp) {
+		this.app = app;
 	}
 
 	handler(req: Request, res: Response) {
