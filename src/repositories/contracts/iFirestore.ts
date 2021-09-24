@@ -5,5 +5,6 @@ export default interface IFirestore {
 	appConfig(): Promise<AppConfig>;
 
 	getTasks(): Promise<Task[]>;
+	getCompletedTasks(after?:Date): Promise<(Task & { done: true })[]>;
 	addTask(task: Task): Promise<void>;
 }

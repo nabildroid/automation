@@ -1,5 +1,5 @@
 import { Express } from "express";
-import { firestore } from "firebase-admin";
+import IApp from "./core/contract/iapp";
 import IRoute from "./core/types/iroute";
 import AppConfig from "./entities/app_config";
 import IFirestore from "./repositories/contracts/iFirestore";
@@ -11,8 +11,8 @@ import Ticktick from "./repositories/ticktick";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
-export default class App {
-	private db!: IFirestore;
+export default class App implements IApp {
+	db!: IFirestore;
 	notion!: INotion;
 	ticktick!: ITicktick;
 	private config!: AppConfig;
