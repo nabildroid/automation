@@ -1,3 +1,6 @@
 export default interface Task {
-    id:string;
+	id: string;
+	parent: string;
+	done: boolean;
+	source: "notion" | "ticktick";
 }
