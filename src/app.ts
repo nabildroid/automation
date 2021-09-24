@@ -8,8 +8,6 @@ import ITicktick from "./repositories/contracts/iTicktick";
 import Firestore from "./repositories/firestore";
 import Notion from "./repositories/notion";
 import Ticktick from "./repositories/ticktick";
-import Hello from "./routes/hello";
-import World from "./routes/world";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -21,8 +19,6 @@ export default class App {
 
 	constructor(server: Express) {
 		this.configRoutes(server, [
-			["get", "/", new Hello(this)],
-			["get", "/world", new World(this)],
 		]);
 	}
 
