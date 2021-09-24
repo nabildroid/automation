@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 
 import IApp from "../core/contract/iapp";
 import TicktickTask from "../entities/ticktick_task";
+import Task from "../core/entities/task";
 
 export default class CompletedTaskJournal implements IRoute {
 	readonly app: IApp;
@@ -18,32 +19,32 @@ export default class CompletedTaskJournal implements IRoute {
 			afterYesterday
 		);
 
-		const claimedTicktickCompleted = allCompletedTasks.filter(
+		const onlyTicktickTasks = allCompletedTasks.filter(
 			(t) => t.source == "ticktick"
-		) as TicktickTask[];
-		const tasks = await this.isItReallyCompleted(claimedTicktickCompleted);
-		
-		const { id } = await this.app.notion.createJournal(tasks);
+		);
+
+		const claimedCompletedTasks = await this.tasksToTicktickTasks(
+			onlyTicktickTasks
+		);
+
+		// this endpoint is used by IFTTT & its doesn't dispatch re-opened tasks, in case the use had change his mind and re-opened the task
+		const completedTasks = claimedCompletedTasks.filter(
+			(task) => task.done
+		);
+
+		const { id } = await this.app.notion.createJournal(completedTasks);
 
 		res.send(
 			`notion journal page has been created https://notion.so/${id}`
 		);
 	}
 
-	/** this endpoint is used by IFTTT & its doesn't dispatch re-opened tasks, in case the use had change his mind and re-opened the task */
-	private async isItReallyCompleted(tasks: TicktickTask[]) {
-		let completedTasks: TicktickTask[] = [];
-
-		for (const task of tasks) {
-			const realTask = await this.app.ticktick.getTask(
-				task.id,
-				task.parent
-			);
-			if (realTask.done == true) {
-				completedTasks.push(task);
-			}
-		}
-
-		return completedTasks;
+	private async tasksToTicktickTasks(tasks: Task[]) {
+		const conversion = tasks.map((task) =>
+			this.app.ticktick.getTask(task.id, task.parent)
+		);
+		return await Promise.all(conversion);
 	}
+
+	
 }
