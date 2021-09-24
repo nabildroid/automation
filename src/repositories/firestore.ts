@@ -5,19 +5,13 @@ import IFirestore from "./contracts/iFirestore";
 
 export default class Firestore implements IFirestore {
 	constructor(client: firestore.Firestore) {}
-	
-	getCompletedTasks(after?: Date): Promise<(task & { done: true; })[]> {
+
+	getCompletedTasks(after?: Date): Promise<(task & { done: true })[]> {
 		throw new Error("Method not implemented.");
 	}
 
 	async appConfig(): Promise<app_config> {
-		return {
-			auth: {
-				notion: "sdsd",
-				ticktick: "dsd",
-			},
-			title: "dzd",
-		};
+		throw new Error("Method not implemented.");
 	}
 	getTasks(): Promise<task[]> {
 		throw new Error("Method not implemented.");

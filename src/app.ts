@@ -8,6 +8,8 @@ import ITicktick from "./repositories/contracts/iTicktick";
 import Firestore from "./repositories/firestore";
 import Notion from "./repositories/notion";
 import Ticktick from "./repositories/ticktick";
+import AddCompletedTicktickTask from "./routes/add_completed_todoist_task";
+import CompletedTaskJournal from "./routes/completed_task_journal";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -19,6 +21,12 @@ export default class App implements IApp {
 
 	constructor(server: Express) {
 		this.configRoutes(server, [
+			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
+			[
+				"post",
+				"/addCompletedTodoistTask",
+				new AddCompletedTicktickTask(this),
+			],
 		]);
 	}
 
