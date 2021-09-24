@@ -1,22 +1,61 @@
 import { firestore } from "firebase-admin";
+import Task from "../core/entities/task";
 import task from "../core/entities/task";
-import app_config from "../entities/app_config";
+import AppConfig from "../entities/app_config";
 import IFirestore from "./contracts/iFirestore";
 
+const CONFIG = "/general/config";
+const TASKS = "/tasks";
+
 export default class Firestore implements IFirestore {
-	constructor(client: firestore.Firestore) {}
+	private readonly client: firestore.Firestore;
+	constructor(client: firestore.Firestore) {
+		this.client = client;
+	}
 
 	getCompletedTasks(after?: Date): Promise<(task & { done: true })[]> {
 		throw new Error("Method not implemented.");
 	}
 
-	async appConfig(): Promise<app_config> {
-		throw new Error("Method not implemented.");
+	async appConfig(): Promise<AppConfig> {
+		const doc = await this.client.doc(CONFIG).get();
+		const config = doc.data();
+		if (config) {
+			return this.validateConfig(config);
+		} else {
+			throw Error(
+				`application configuration doesn't exists in the provided database, path(${CONFIG}) is empty`
+			);
+		}
 	}
+
 	getTasks(): Promise<task[]> {
 		throw new Error("Method not implemented.");
 	}
-	addTask(task: task): Promise<void> {
-		throw new Error("Method not implemented.");
+	async addTask(task: task): Promise<void> {
+		const exists = await this.getTask(task.id);
+		if (exists) {
+			await this.client.doc(`${TASKS}/${exists.id}`).update(task);
+		} else {
+			await this.client.collection(TASKS).add(task);
+		}
+	}
+
+	/**
+	 *
+	 * @param taskId it's not the document id, but rather a stored id withing the document it self
+	 */
+	private async getTask(taskId: string) {
+		const ref = this.client.collection(TASKS).where("id", "==", taskId);
+		const query = await ref.get();
+
+		if (query.size) {
+			return query.docs[0]
+		}
+	}
+
+	private validateConfig(config: any): AppConfig {
+		// todo validate and create a default configuration
+		return config;
 	}
 }

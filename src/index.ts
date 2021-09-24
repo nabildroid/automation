@@ -7,6 +7,7 @@ const port = process.env.PORT || 8080;
 const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT || "{}");
 
 const server = Express();
+server.use(Express.json());
 
 const app = new App(server);
 
