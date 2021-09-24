@@ -10,6 +10,8 @@ const server = Express();
 
 const app = new App(server);
 
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+
 server.listen(port, async () => {
 	console.log(`listening on port ${port} `);
 

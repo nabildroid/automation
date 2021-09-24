@@ -41,7 +41,7 @@ export default class App implements IApp {
 		});
 	}
 
-	async init(firestore: any) {
+	async init(firestore: FirebaseFirestore.Firestore) {
 		this.db = new Firestore(firestore);
 		this.config = await this.db.appConfig();
 		this.notion = new Notion(
