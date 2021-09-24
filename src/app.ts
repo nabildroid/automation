@@ -44,7 +44,10 @@ export default class App implements IApp {
 	async init(firestore: any) {
 		this.db = new Firestore(firestore);
 		this.config = await this.db.appConfig();
-		this.notion = new Notion(this.config.auth.notion);
+		this.notion = new Notion(
+			this.config.auth.notion,
+			this.config.notionConfig
+		);
 		this.ticktick = new Ticktick(this.config.auth.ticktick);
 
 		console.log(`#${this.config.title} has been initiated`);
