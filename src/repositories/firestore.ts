@@ -14,8 +14,15 @@ export default class Firestore implements IFirestore {
 	}
 
 	async getCompletedTasks(after?: Date) {
-		// todo implement limited time interval
-		const ref = this.client.collection(TASKS).where("done", "==", true);
+		let ref = this.client.collection(TASKS).where("done", "==", true);
+		if (after) {
+			ref = ref.where(
+				"created",
+				">=",
+				firestore.Timestamp.fromDate(after)
+			);
+		}
+
 		const query = await ref.get();
 
 		return query.docs.map((d) => d.data()) as (task & { done: true })[];
@@ -39,10 +46,17 @@ export default class Firestore implements IFirestore {
 
 	async addTask(task: task): Promise<void> {
 		const exists = await this.getTask(task.id);
+
+		// FIXME is it goo to throw time here without information the rest of the system
+		const taskWithTime = {
+			...task,
+			created: firestore.Timestamp.now(),
+		};
+
 		if (exists) {
-			await this.client.doc(`${TASKS}/${exists.id}`).update(task);
+			await this.client.doc(`${TASKS}/${exists.id}`).update(taskWithTime);
 		} else {
-			await this.client.collection(TASKS).add(task);
+			await this.client.collection(TASKS).add(taskWithTime);
 		}
 	}
 

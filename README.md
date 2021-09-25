@@ -4,7 +4,7 @@ personal Nodejs application for automating and linking several applications toge
 
 ## Todos
 
-- [ ]  pull up all completed tasks from TickTick and add the to your daily journal as a blocks
+- [x]  pull up all completed tasks from TickTick and add the to your daily journal as a blocks
 - [ ]  Automate shortcut for uploading picture of the day
 - [ ]  add task to Notion Inbox ubuntu
 - [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF

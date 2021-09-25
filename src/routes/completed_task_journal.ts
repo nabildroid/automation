@@ -3,8 +3,8 @@ import IRoute from "../core/types/iroute";
 import { Request, Response } from "express";
 
 import IApp from "../core/contract/iapp";
-import TicktickTask from "../entities/ticktick_task";
 import Task from "../core/entities/task";
+import { setTodayUTCHour } from "../core/utils";
 
 export default class CompletedTaskJournal implements IRoute {
 	readonly app: IApp;
@@ -13,10 +13,8 @@ export default class CompletedTaskJournal implements IRoute {
 	}
 
 	async handler(_: Request, res: Response) {
-		// todo it should be sense 6AM for example
-		const afterYesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
 		const allCompletedTasks = await this.app.db.getCompletedTasks(
-			afterYesterday
+			setTodayUTCHour(5)
 		);
 
 		const onlyTicktickTasks = allCompletedTasks.filter(
