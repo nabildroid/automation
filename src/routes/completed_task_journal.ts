@@ -30,11 +30,17 @@ export default class CompletedTaskJournal implements IRoute {
 			(task) => task.done
 		);
 
-		const { id } = await this.app.notion.addJournal(completedTasks);
+		if (completedTasks.length) {
+			const { id } = await this.app.notion.addJournal(completedTasks);
 
-		res.send(
-			`notion journal page has been created https://notion.so/${id}`
-		);
+			res.send(
+				`notion journal page has been created https://notion.so/${id}`
+			);
+		} else {
+			res.send(
+				":( you didn't complete any task today, you gota work harder tomorrow"
+			);
+		}
 	}
 
 	private async tasksToTicktickTasks(tasks: Task[]) {
@@ -43,6 +49,4 @@ export default class CompletedTaskJournal implements IRoute {
 		);
 		return await Promise.all(conversion);
 	}
-
-	
 }
