@@ -59,19 +59,5 @@ export default class App implements IApp {
 		this.ticktick = new Ticktick(this.config.auth.ticktick);
 
 		console.log(`#${this.config.title} has been initiated`);
-		await this.dev();
-	}
-
-	private async dev() {
-		this.notion.addJournal([
-			{
-				id: "614ec6d924fe132a6c761b3f",
-				parent: "inbox",
-				title: "test 2",
-				done: true,
-				tags: [],
-				source: "ticktick",
-			},
-		]);
 	}
 }
