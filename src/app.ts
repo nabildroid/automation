@@ -10,6 +10,7 @@ import Notion from "./repositories/notion";
 import Ticktick from "./repositories/ticktick";
 import AddCompletedTicktickTask from "./routes/add_completed_todoist_task";
 import CompletedTaskJournal from "./routes/completed_task_journal";
+import uploadScreenshot from "./routes/upload_screenshot";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -22,6 +23,7 @@ export default class App implements IApp {
 	constructor(server: Express) {
 		this.configRoutes(server, [
 			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
+			["post", "/uploadScreenshot", new uploadScreenshot(this)],
 			[
 				"post",
 				"/addCompletedTodoistTask",
@@ -51,5 +53,19 @@ export default class App implements IApp {
 		this.ticktick = new Ticktick(this.config.auth.ticktick);
 
 		console.log(`#${this.config.title} has been initiated`);
+		await this.dev();
+	}
+
+	private async dev() {
+		this.notion.addJournal([
+			{
+				id: "614ec6d924fe132a6c761b3f",
+				parent: "inbox",
+				title: "test 2",
+				done: true,
+				tags: [],
+				source: "ticktick",
+			},
+		]);
 	}
 }

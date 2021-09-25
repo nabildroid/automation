@@ -1,10 +1,11 @@
-import notion_inbox from "../entities/notion_inbox";
+import NotionInbox from "../entities/notion_inbox";
 import notion_journal from "../entities/notion_journal";
 import INotion from "./contracts/iNotion";
 import { Client } from "@notionhq/client";
 import { NotionConfig } from "../entities/app_config";
 import TicktickTask from "../entities/ticktick_task";
 import { Block } from "@notionhq/client/build/src/api-types";
+
 export default class Notion implements INotion {
 	private readonly client: Client;
 	private readonly config: NotionConfig;
@@ -15,9 +16,65 @@ export default class Notion implements INotion {
 		this.config = config;
 	}
 
-	getInbox(): Promise<notion_inbox[]> {
+	async addScreenshotToInbox(url: string): Promise<NotionInbox> {
+		const { id, parent } = await this.client.pages.create({
+			parent: {
+				database_id: this.config.inbox,
+			},
+			properties: {
+				title: {
+					type: "title",
+					title: [
+						{
+							type: "text",
+							text: {
+								content: "Screenshot",
+							},
+						},
+						{
+							type: "mention",
+							mention: {
+								type: "date",
+
+								date: {
+									start: new Date().toISOString(),
+								},
+							},
+						} as any,
+					],
+				},
+			},
+			children: [
+				{
+					image: {
+						external: {
+							url, // todo store the file in GCS, sense Notion uses the provided link instead of uploading a copy
+						},
+						caption: [
+							{
+								type: "text",
+								text: {
+									content: "Screenshot taken from your phone",
+								},
+							},
+						],
+					},
+				},
+			] as Block[],
+		});
+
+		return {
+			done: false,
+			id,
+			parent: (parent as any).database_id,
+			source: "notion",
+		};
+	}
+
+	getInbox(): Promise<NotionInbox[]> {
 		throw new Error("Method not implemented.");
 	}
+
 	private async getTodayJournal(): Promise<notion_journal | undefined> {
 		const response = await this.client.databases.query({
 			database_id: this.config.journal,

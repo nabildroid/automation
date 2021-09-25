@@ -5,4 +5,5 @@ import TicktickTask from "../../entities/ticktick_task";
 export default interface INotion {
 	getInbox(): Promise<NotionInbox[]>;
 	addJournal(ticktickTasks: TicktickTask[]): Promise<NotionJournal>;
+	addScreenshotToInbox(url: string): Promise<NotionInbox>;
 }
