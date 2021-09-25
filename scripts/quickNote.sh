@@ -48,5 +48,5 @@ else
         else
             backup "$note"
         fi
-    }
+    }&
 fi
