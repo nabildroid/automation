@@ -10,9 +10,11 @@ const authorization = process.env.AUTHORIZATION;
 const server = Express();
 server.use(Express.json());
 
-server.use((req, _, next) => {
+server.use((req, res, next) => {
 	if (!authorization || req.headers.authorization == authorization) {
 		next();
+	}else {
+		res.redirect("https://laknabil.notion.site");
 	}
 });
 
