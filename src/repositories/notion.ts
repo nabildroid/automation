@@ -40,19 +40,25 @@ export default class Notion implements INotion {
 		}
 	}
 
+	private async todayJournal(defaultTitle: string) {
+		return (
+			(await this.getTodayJournal()) ||
+			(await this.createTodayJournal("Completed Tasks"))
+		);
+	}
+
 	async addJournal(ticktickTasks: TicktickTask[]): Promise<notion_journal> {
-		const joural =
-			(await this.getTodayJournal()) || (await this.createTodayJournal());
+		const journal = await this.todayJournal("Completed Tasks");
 
 		await this.client.blocks.children.append({
-			block_id: joural.id,
+			block_id: journal.id,
 			children: Notion.createJournalBlocks(ticktickTasks),
 		});
 
-		return joural;
+		return journal;
 	}
 
-	private async createTodayJournal(): Promise<notion_journal> {
+	private async createTodayJournal(title: string): Promise<notion_journal> {
 		const { id, parent } = await this.client.pages.create({
 			parent: {
 				database_id: this.config.journal,
@@ -64,7 +70,7 @@ export default class Notion implements INotion {
 						{
 							type: "text",
 							text: {
-								content: "Completed-tasks",
+								content: title,
 							},
 						},
 					],
