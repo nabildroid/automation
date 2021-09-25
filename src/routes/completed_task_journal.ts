@@ -32,7 +32,7 @@ export default class CompletedTaskJournal implements IRoute {
 			(task) => task.done
 		);
 
-		const { id } = await this.app.notion.createJournal(completedTasks);
+		const { id } = await this.app.notion.addJournal(completedTasks);
 
 		res.send(
 			`notion journal page has been created https://notion.so/${id}`
