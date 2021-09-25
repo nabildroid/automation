@@ -16,7 +16,7 @@ export default class uploadScreenshot implements IRoute {
 		const url = req.body.url;
 
 		
-		const tempFileName = "temp-screenshot";
+		const tempFileName = "temp-screenshot" + Math.random();
 		const removeLocalFile = await downloadFile(url,tempFileName);
 		const publicUrl = await this.app.storage.addScreenshot(tempFileName);
 
