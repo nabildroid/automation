@@ -13,8 +13,12 @@ export default class Firestore implements IFirestore {
 		this.client = client;
 	}
 
-	getCompletedTasks(after?: Date): Promise<(task & { done: true })[]> {
-		throw new Error("Method not implemented.");
+	async getCompletedTasks(after?: Date) {
+		// todo implement limited time interval
+		const ref = this.client.collection(TASKS).where("done", "==", true);
+		const query = await ref.get();
+
+		return query.docs.map((d) => d.data()) as (task & { done: true })[];
 	}
 
 	async appConfig(): Promise<AppConfig> {
@@ -32,6 +36,7 @@ export default class Firestore implements IFirestore {
 	getTasks(): Promise<task[]> {
 		throw new Error("Method not implemented.");
 	}
+
 	async addTask(task: task): Promise<void> {
 		const exists = await this.getTask(task.id);
 		if (exists) {
@@ -50,7 +55,7 @@ export default class Firestore implements IFirestore {
 		const query = await ref.get();
 
 		if (query.size) {
-			return query.docs[0]
+			return query.docs[0];
 		}
 	}
 
