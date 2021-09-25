@@ -6,4 +6,5 @@ export default interface INotion {
 	getInbox(): Promise<NotionInbox[]>;
 	addJournal(ticktickTasks: TicktickTask[]): Promise<NotionJournal>;
 	addScreenshotToInbox(url: string): Promise<NotionInbox>;
+	addToInbox(title: string, body?: string): Promise<NotionInbox>;
 }

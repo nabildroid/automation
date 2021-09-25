@@ -15,6 +15,49 @@ export default class Notion implements INotion {
 		});
 		this.config = config;
 	}
+	async addToInbox(title: string, body?: string): Promise<NotionInbox> {
+		const { id, parent } = await this.client.pages.create({
+			parent: {
+				database_id: this.config.inbox,
+			},
+			properties: {
+				title: {
+					type: "title",
+					title: [
+						{
+							type: "text",
+							text: {
+								content: title,
+							},
+						},
+					],
+				},
+			},
+			children: body
+				? ([
+						{
+							paragraph: {
+								text: [
+									{
+										type: "text",
+										text: {
+											content: body,
+										},
+									},
+								],
+							},
+						},
+				  ] as Block[])
+				: [],
+		});
+
+		return {
+			done: false,
+			id,
+			parent: (parent as any).database_id,
+			source: "notion",
+		};
+	}
 
 	async addScreenshotToInbox(url: string): Promise<NotionInbox> {
 		const { id, parent } = await this.client.pages.create({

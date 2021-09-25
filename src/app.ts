@@ -15,6 +15,7 @@ import CompletedTaskJournal from "./routes/completed_task_journal";
 import uploadScreenshot from "./routes/upload_screenshot";
 import IStorage from "./repositories/contracts/IStorage";
 import Storage from "./repositories/storage";
+import NewNotionInbox from "./routes/new_notion_inbox";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -28,6 +29,7 @@ export default class App implements IApp {
 	constructor(server: Express) {
 		this.configRoutes(server, [
 			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
+			["post", "/newNotionInbox", new NewNotionInbox(this)],
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
 			[
 				"post",
