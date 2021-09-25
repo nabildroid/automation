@@ -1,4 +1,6 @@
 import { Express } from "express";
+import { Bucket } from "@google-cloud/storage";
+
 import IApp from "./core/contract/iapp";
 import IRoute from "./core/types/iroute";
 import AppConfig from "./entities/app_config";
@@ -11,12 +13,15 @@ import Ticktick from "./repositories/ticktick";
 import AddCompletedTicktickTask from "./routes/add_completed_todoist_task";
 import CompletedTaskJournal from "./routes/completed_task_journal";
 import uploadScreenshot from "./routes/upload_screenshot";
+import IStorage from "./repositories/contracts/IStorage";
+import Storage from "./repositories/storage";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
 export default class App implements IApp {
 	db!: IFirestore;
 	notion!: INotion;
+	storage!: IStorage;
 	ticktick!: ITicktick;
 	private config!: AppConfig;
 
@@ -43,13 +48,14 @@ export default class App implements IApp {
 		});
 	}
 
-	async init(firestore: FirebaseFirestore.Firestore) {
+	async init(firestore: FirebaseFirestore.Firestore, bucket: Bucket) {
 		this.db = new Firestore(firestore);
 		this.config = await this.db.appConfig();
 		this.notion = new Notion(
 			this.config.auth.notion,
 			this.config.notionConfig
 		);
+		this.storage = new Storage(bucket);
 		this.ticktick = new Ticktick(this.config.auth.ticktick);
 
 		console.log(`#${this.config.title} has been initiated`);

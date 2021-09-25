@@ -13,7 +13,7 @@ server.use(Express.json());
 server.use((req, res, next) => {
 	if (!authorization || req.headers.authorization == authorization) {
 		next();
-	}else {
+	} else {
 		res.redirect("https://laknabil.notion.site");
 	}
 });
@@ -22,8 +22,11 @@ const app = new App(server);
 
 admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
+const storage = admin.storage();
+const bucket = storage.bucket(process.env.BUCKET);
+
 server.listen(port, async () => {
 	console.log(`listening on port ${port} `);
 
-	app.init(admin.firestore());
+	app.init(admin.firestore(), bucket);
 });
