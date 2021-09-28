@@ -1,32 +1,29 @@
-import axios, { AxiosInstance } from "axios";
 import ticktick_task from "../entities/ticktick_task";
+import TicktickClient from "../services/ticktick";
 import ITicktick from "./contracts/iTicktick";
 
 export default class Ticktick implements ITicktick {
-	private readonly client: AxiosInstance;
+	private readonly client: TicktickClient;
 
-	constructor(auth: string) {
-		this.client = axios.create({
-			baseURL: "https://api.ticktick.com",
-			headers: {
-				Authorization: `bearer ${auth}`,
-			},
-		});
+	constructor(client: TicktickClient) {
+		this.client = client;
 	}
 
-	async getTask(id: string, list: string): Promise<ticktick_task> {
-		const endpoint = `/open/v1/project/${list}/task/${id}`;
-		const { data, status } = await this.client.get(endpoint);
+	async getTask(
+		id: string,
+		list: string
+	): Promise<ticktick_task | undefined> {
+		const { data, status } = await this.client.getTask(id, list);
 
 		if (status != 200) {
-			throw Error("unable to get task URL:" + endpoint);
+			return undefined;
 		} else {
 			return {
 				id: data.id,
 				parent: data.projectId,
 				title: data.title,
 				done: data.status == 2,
-				tags: [], // todo ticktick doesn't support returning tags
+				tags: data.tags || [],
 				source: "ticktick",
 			};
 		}

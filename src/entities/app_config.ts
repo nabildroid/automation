@@ -1,6 +1,6 @@
 interface AuthServices {
 	notion: string;
-	ticktick: string;
+	ticktick?: string;
 }
 
 export interface NotionConfig {
@@ -8,8 +8,15 @@ export interface NotionConfig {
 	journal: string;
 }
 
+export interface TicktickConfig {
+	inbox: string;
+	password: string;
+	email: string;
+}
+
 export default interface AppConfig {
 	title: string;
 	auth: AuthServices;
 	notionConfig: NotionConfig;
+	ticktickConfig: TicktickConfig;
 }

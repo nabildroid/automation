@@ -16,6 +16,7 @@ import uploadScreenshot from "./routes/upload_screenshot";
 import IStorage from "./repositories/contracts/IStorage";
 import Storage from "./repositories/storage";
 import NewNotionInbox from "./routes/new_notion_inbox";
+import TicktickClient from "./services/ticktick";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -58,7 +59,17 @@ export default class App implements IApp {
 			this.config.notionConfig
 		);
 		this.storage = new Storage(bucket);
-		this.ticktick = new Ticktick(this.config.auth.ticktick);
+
+		const ticktickClient = new TicktickClient(
+			this.config.ticktickConfig.email,
+			this.config.ticktickConfig.password,
+			this.db.updateTicktickAuth.bind(this.db),
+			{
+				auth:this.config.auth.ticktick
+			}
+		);
+
+		this.ticktick = new Ticktick(ticktickClient);
 
 		console.log(`#${this.config.title} has been initiated`);
 	}

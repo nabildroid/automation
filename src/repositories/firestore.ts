@@ -12,6 +12,12 @@ export default class Firestore implements IFirestore {
 	constructor(client: firestore.Firestore) {
 		this.client = client;
 	}
+	async updateTicktickAuth(auth: string): Promise<void> {
+		await this.client.doc(CONFIG).update({
+			"auth.ticktick":auth,
+		});
+		
+	}
 
 	async getCompletedTasks(after?: Date) {
 		let ref = this.client.collection(TASKS).where("done", "==", true);
@@ -75,6 +81,11 @@ export default class Firestore implements IFirestore {
 
 	private validateConfig(config: any): AppConfig {
 		// todo validate and create a default configuration
+		if (!(config as AppConfig).ticktickConfig.password) {
+			config.ticktickConfig.password =
+				process.env.TICKTICK_DEFAULT_PASSWORD;
+		}
+
 		return config;
 	}
 }
