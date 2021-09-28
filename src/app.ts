@@ -10,13 +10,13 @@ import ITicktick from "./repositories/contracts/iTicktick";
 import Firestore from "./repositories/firestore";
 import Notion from "./repositories/notion";
 import Ticktick from "./repositories/ticktick";
-import AddCompletedTicktickTask from "./routes/add_completed_todoist_task";
 import CompletedTaskJournal from "./routes/completed_task_journal";
 import uploadScreenshot from "./routes/upload_screenshot";
 import IStorage from "./repositories/contracts/IStorage";
 import Storage from "./repositories/storage";
 import NewNotionInbox from "./routes/new_notion_inbox";
 import TicktickClient from "./services/ticktick";
+import { today } from "./core/utils";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -32,11 +32,6 @@ export default class App implements IApp {
 			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
 			["post", "/newNotionInbox", new NewNotionInbox(this)],
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
-			[
-				"post",
-				"/addCompletedTodoistTask",
-				new AddCompletedTicktickTask(this),
-			],
 		]);
 	}
 
@@ -72,5 +67,6 @@ export default class App implements IApp {
 		this.ticktick = new Ticktick(ticktickClient);
 
 		console.log(`#${this.config.title} has been initiated`);
+		
 	}
 }

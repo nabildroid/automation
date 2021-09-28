@@ -1,11 +1,13 @@
 import axios, { AxiosInstance } from "axios";
+import {dateFormat} from "../core/utils";
 
 const BASEURL = "https://api.ticktick.com/api/v2";
 
 enum API {
 	STATUS = "/user/status",
 	LOGIN = "/user/signin",
-	GET_TASK = "/task/",
+	TASK_GET = "/task/",
+	TASK_COMPLEYED = "/project/all/completedInAll/",
 }
 
 export default class TicktickClient {
@@ -86,9 +88,18 @@ export default class TicktickClient {
 	}
 
 	getTask(taskId: string, projectId: string) {
-		return this.client.get(API.GET_TASK + taskId, {
+		return this.client.get(API.TASK_GET + taskId, {
 			params: {
 				projectId,
+			},
+		});
+	}
+
+	getAllCompletedTasks(after: Date) {
+		return this.client.get(API.TASK_COMPLEYED, {
+			params: {
+				from:dateFormat(after),
+				to:"",
 			},
 		});
 	}

@@ -4,7 +4,8 @@ import { Request, Response } from "express";
 
 import IApp from "../core/contract/iapp";
 import Task from "../core/entities/task";
-import { setTodayUTCHour } from "../core/utils";
+import { setTodayUTCHour, today, yesterday } from "../core/utils";
+import TicktickTask from "../entities/ticktick_task";
 
 export default class CompletedTaskJournal implements IRoute {
 	readonly app: IApp;
@@ -13,21 +14,8 @@ export default class CompletedTaskJournal implements IRoute {
 	}
 
 	async handler(_: Request, res: Response) {
-		const allCompletedTasks = await this.app.db.getCompletedTasks(
-			setTodayUTCHour(5)
-		);
-
-		const onlyTicktickTasks = allCompletedTasks.filter(
-			(t) => t.source == "ticktick"
-		);
-
-		const claimedCompletedTasks = await this.tasksToTicktickTasks(
-			onlyTicktickTasks
-		);
-
-		// this endpoint is used by IFTTT & its doesn't dispatch re-opened tasks, in case the use had change his mind and re-opened the task
-		const completedTasks = claimedCompletedTasks.filter(
-			(task) => task.done
+		const completedTasks = await this.app.ticktick.getCompletedTasks(
+			yesterday()
 		);
 
 		if (completedTasks.length) {
@@ -47,6 +35,9 @@ export default class CompletedTaskJournal implements IRoute {
 		const conversion = tasks.map((task) =>
 			this.app.ticktick.getTask(task.id, task.parent)
 		);
-		return await Promise.all(conversion);
+
+		const tickticktasks = await Promise.all(conversion);
+
+		return tickticktasks.filter((item): item is TicktickTask => !!item);
 	}
 }
