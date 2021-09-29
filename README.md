@@ -22,6 +22,7 @@ personal Nodejs application for automating and linking several applications toge
 - [x]  screenshots to notion Inbox
 - [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
   - [ ]  periodically check for out-of-sync problems
+- [ ] create a widget for showing ticktick statistics
 - [ ]  copy of Daiylo App
 - [ ]  pocket finished Reads ⇒ dedicated notion DB
 - [ ]  sync Twitter DB

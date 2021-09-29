@@ -8,6 +8,7 @@ enum API {
 	LOGIN = "/user/signin",
 	TASK_GET = "/task/",
 	TASK_COMPLEYED = "/project/all/completedInAll/",
+	STATISTICS_GENERAL = "/statistics/general",
 }
 
 export default class TicktickClient {
@@ -95,6 +96,9 @@ export default class TicktickClient {
 		});
 	}
 
+	getGeneralStatistics() {
+		return this.client.get(API.STATISTICS_GENERAL);
+	}
 	getAllCompletedTasks(after: Date) {
 		return this.client.get(API.TASK_COMPLEYED, {
 			params: {
