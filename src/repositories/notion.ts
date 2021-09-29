@@ -60,6 +60,7 @@ export default class Notion implements INotion {
 			id,
 			parent: (parent as any).database_id,
 			source: "notion",
+			title,
 		};
 	}
 
@@ -115,6 +116,7 @@ export default class Notion implements INotion {
 			id,
 			parent: (parent as any).database_id,
 			source: "notion",
+			title: `Screenshot ${new Date().toISOString()}`,
 		};
 	}
 

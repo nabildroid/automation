@@ -37,6 +37,9 @@ export default class Ticktick implements ITicktick {
 			})).filter(d=>d.done) as ticktick_task[]
 		} else return [];
 	}
+	addToInbox(title: string, body?: string): Promise<ticktick_task> {
+		throw new Error("Method not implemented.");
+	}
 	async getTask(
 		id: string,
 		list: string
