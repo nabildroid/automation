@@ -2,15 +2,21 @@ import { firestore } from "firebase-admin";
 import Task from "../core/entities/task";
 import task from "../core/entities/task";
 import AppConfig from "../entities/app_config";
+import syncedInboxes from "../entities/syncedInboxes";
 import IFirestore from "./contracts/iFirestore";
 
 const CONFIG = "/general/config";
 const TASKS = "/tasks";
+const SYNCEDINBOXES = "/synced_inboxes";
 
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
 	constructor(client: firestore.Firestore) {
 		this.client = client;
+	}
+	
+	async addSyncedInboxes(syncedInboxes: syncedInboxes): Promise<void> {
+		await this.client.collection(SYNCEDINBOXES).add(syncedInboxes);
 	}
 	async updateTicktickAuth(auth: string): Promise<void> {
 		await this.client.doc(CONFIG).update({

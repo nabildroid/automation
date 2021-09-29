@@ -17,6 +17,7 @@ import Storage from "./repositories/storage";
 import NewNotionInbox from "./routes/new_notion_inbox";
 import TicktickClient from "./services/ticktick";
 import { today } from "./core/utils";
+import SyncNotionTicktickInboxes from "./routes/sync_notion_ticktick_inboxes";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -29,6 +30,12 @@ export default class App implements IApp {
 
 	constructor(server: Express) {
 		this.configRoutes(server, [
+			[
+				"post",
+				"/syncNotionTicktickInboxes",
+				new SyncNotionTicktickInboxes(this),
+			],
+
 			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
 			["post", "/newNotionInbox", new NewNotionInbox(this)],
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
@@ -60,13 +67,12 @@ export default class App implements IApp {
 			this.config.ticktickConfig.password,
 			this.db.updateTicktickAuth.bind(this.db),
 			{
-				auth:this.config.auth.ticktick
+				auth: this.config.auth.ticktick,
 			}
 		);
 
 		this.ticktick = new Ticktick(ticktickClient);
 
 		console.log(`#${this.config.title} has been initiated`);
-		
 	}
 }

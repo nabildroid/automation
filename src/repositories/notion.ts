@@ -15,6 +15,10 @@ export default class Notion implements INotion {
 		});
 		this.config = config;
 	}
+
+	getInbox(id: string): Promise<NotionInbox | undefined> {
+		throw new Error("Method not implemented.");
+	}
 	async addToInbox(title: string, body?: string): Promise<NotionInbox> {
 		const { id, parent } = await this.client.pages.create({
 			parent: {
@@ -114,9 +118,6 @@ export default class Notion implements INotion {
 		};
 	}
 
-	getInbox(): Promise<NotionInbox[]> {
-		throw new Error("Method not implemented.");
-	}
 
 	private async getTodayJournal(): Promise<notion_journal | undefined> {
 		const response = await this.client.databases.query({
