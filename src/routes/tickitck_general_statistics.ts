@@ -27,12 +27,15 @@ export default class TicktickGeneralStatistics implements IRoute {
 			todayCompleted,
 			totalCompleted,
 			yesterdayCompleted,
-			daysRow: Object.keys(scoreByDay).map(formatTime),
-			scoreByDay:Object.values(scoreByDay),
-			taskByDay:Object.values(taskByDay).map(v=>v.completeCount),
+
+			week: Object.entries(scoreByDay).map(([key, val]) => ({
+				date: key,
+				score: val,
+				tasks: taskByDay[key].completeCount,
+			})),
 		};
 
-        res.send(JSON.stringify(response));
+		res.send(JSON.stringify(response));
 	}
 }
 
