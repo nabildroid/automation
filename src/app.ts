@@ -18,6 +18,7 @@ import NewNotionInbox from "./routes/new_notion_inbox";
 import TicktickClient from "./services/ticktick";
 import { today } from "./core/utils";
 import SyncNotionTicktickInboxes from "./routes/sync_notion_ticktick_inboxes";
+import TicktickGeneralStatistics from "./routes/tickitck_general_statistics";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -39,6 +40,7 @@ export default class App implements IApp {
 			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
 			["post", "/newNotionInbox", new NewNotionInbox(this)],
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
+			["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
 		]);
 	}
 
