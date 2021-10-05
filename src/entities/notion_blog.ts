@@ -3,6 +3,7 @@ import { NotionRow } from "../core/entities/notion_row";
 export default interface NotionBlog extends NotionRow {
 	lastEdited: Date;
 	tags: string[];
+	title: string;
 }
 
-export interface NotionBlogContent {}
+export type NotionBlogContent = any;

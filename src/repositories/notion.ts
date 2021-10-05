@@ -5,6 +5,8 @@ import { Client } from "@notionhq/client";
 import { NotionConfig } from "../entities/app_config";
 import TicktickTask from "../entities/ticktick_task";
 import { Block } from "@notionhq/client/build/src/api-types";
+import NotionBlog, { NotionBlogContent } from "../entities/notion_blog";
+import { PropertyValueMap } from "@notionhq/client/build/src/api-endpoints";
 
 export default class Notion implements INotion {
 	private readonly client: Client;
@@ -14,6 +16,33 @@ export default class Notion implements INotion {
 			auth,
 		});
 		this.config = config;
+	}
+
+	async listBlog(): Promise<NotionBlog[]> {
+		const blogs = await this.client.databases.query({
+			database_id: this.config.blog,
+		});
+		
+
+		const list = blogs.results.map<NotionBlog>((page) => ({
+			id: page.id,
+			parent: (page.parent as any).database_id,
+			source: "notion",
+			lastEdited: new Date(page.last_edited_time),
+			title: Notion.extractProperty<string>("Name", page.properties),
+			done: !Notion.extractProperty<boolean>("private", page.properties),
+			tags: Notion.extractProperty<string[]>("tags", page.properties),
+		}));
+
+		return list;
+	}
+
+	async getBlogContent(blog: NotionBlog): Promise<NotionBlogContent> {
+		const children = await this.client.blocks.children.list({
+			block_id: blog.id,
+		});
+
+		return Notion.childrenToMarkdown(children.results);
 	}
 
 	getInbox(id: string): Promise<NotionInbox | undefined> {
@@ -217,5 +246,45 @@ export default class Notion implements INotion {
 				},
 			},
 		] as Block[];
+	}
+
+	static childrenToMarkdown(children: Block[]): string {
+		// todo implement this function
+		return "markdown content";
+	}
+
+	static extractProperty<T extends any>(
+		label: string,
+		props: PropertyValueMap
+	) {
+		const prop = props[label];
+		switch (prop.type) {
+			case "title":
+				return prop.title
+					.map((v) => v.plain_text)
+					.join(" ")
+					.trim() as T;
+			case "checkbox":
+				return prop.checkbox as T;
+			case "created_time":
+				return new Date(prop.created_time) as T;
+			case "date":
+				return new Date(prop.date?.start!) as T;
+			case "last_edited_time":
+				return new Date(prop.last_edited_time) as T;
+			case "multi_select":
+				return prop.multi_select.map((s) => s.name) as T;
+			case "number":
+				return prop.number as T;
+			case "select":
+				return prop.select?.name as T;
+			case "title":
+				return prop.title
+					.map((v) => v.plain_text)
+					.join(" ")
+					.trim() as T;
+			default:
+				throw Error("unsupported type");
+		}
 	}
 }

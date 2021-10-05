@@ -12,13 +12,17 @@ export default class NotionBlog implements IRoute {
 
 	async handler(_: Request, res: Response) {
 		const blogs = await this.app.notion.listBlog();
-		const lastUpdatedBlog = blogs.sort(
-			(a, b) => a.lastEdited.getTime() - b.lastEdited.getTime()
-		)[0];
 
+		const lastUpdatedBlog = blogs.sort(
+			(a, b) => b.lastEdited.getTime() - a.lastEdited.getTime()
+		)[0];
 		const lastSeenUpdate = await this.app.db.lastSeenBlogUpdate();
 
-		if (lastSeenUpdate != lastUpdatedBlog.lastEdited) {
+		const isUpdated =
+			lastSeenUpdate.toISOString() !=
+			lastUpdatedBlog.lastEdited.toISOString();
+			
+		if (isUpdated) {
 			await this.app.db.updateRecentBlogDate(lastUpdatedBlog.lastEdited);
 
 			const fullBlogs = await Promise.all(
@@ -28,7 +32,7 @@ export default class NotionBlog implements IRoute {
 				}))
 			);
 
-			res.send(JSON.stringify(fullBlogs));
-		}
+			return res.send(JSON.stringify(fullBlogs));
+		} else return res.send("[]");
 	}
 }

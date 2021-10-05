@@ -1,3 +1,4 @@
+import NotionBlog, { NotionBlogContent } from "../../entities/notion_blog";
 import NotionInbox from "../../entities/notion_inbox";
 import NotionJournal from "../../entities/notion_journal";
 import TicktickTask from "../../entities/ticktick_task";

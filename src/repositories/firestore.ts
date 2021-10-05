@@ -8,13 +8,30 @@ import IFirestore from "./contracts/iFirestore";
 const CONFIG = "/general/config";
 const TASKS = "/tasks";
 const SYNCEDINBOXES = "/synced_inboxes";
+const BLOG = "/blog/last_update";
 
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
 	constructor(client: firestore.Firestore) {
 		this.client = client;
 	}
-	
+
+	async updateRecentBlogDate(date: Date): Promise<void> {
+		await this.client.doc(BLOG).set({
+			date: firestore.Timestamp.fromDate(date),
+		});
+	}
+
+	async lastSeenBlogUpdate(): Promise<Date> {
+		const doc = await this.client.doc(BLOG).get();
+		const data = doc.data();
+		if (data) {
+			return (data.date as FirebaseFirestore.Timestamp).toDate();
+		} else {
+			return new Date("1970 01 01");
+		}
+	}
+
 	async addSyncedInboxes(syncedInboxes: syncedInboxes): Promise<void> {
 		await this.client.collection(SYNCEDINBOXES).add(syncedInboxes);
 	}
