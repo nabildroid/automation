@@ -4,9 +4,29 @@ personal Nodejs application for automating and linking several applications toge
 
 ## Todos
 
-- [x]  pull up all completed tasks from TickTick and add the to your daily journal as a blocks
+- [ ] **In Progress** API that expose all the tech notes (blogs) from notion
+  > Notion doesn't yet support all the block types. for instance Quote is not supported  
 - [ ]  Automate shortcut for uploading picture of the day
-- [x]  add task to Notion Inbox ubuntu
+
+- [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
+  - [ ]  periodically check for out-of-sync problems
+  - endpoint for statistis => google sheets => google data studio => android app web widget
+- ~~copy of Daiylo App~~
+- [ ]  pocket finished Reads ⇒ dedicated notion DB
+
+  > pocket doesn't provide an API for extracting highlights, so its kinda useless
+
+- [ ]  sync Twitter DB
+  - [ ]  twitter sync followers
+  - [ ]  tweets from phone
+  - [ ]  auto publish tweets
+- [ ]  PC pomodoro timer
+
+## Done
+
+- [x]  pull up all completed tasks from TickTick and add them to your daily journal as a blocks
+
+- [x]  add task to Notion Inbox ubuntu #1
   1. make a keyboard shortcut E.g. SUPER+Q that execute
 
       ```bash
@@ -19,16 +39,7 @@ personal Nodejs application for automating and linking several applications toge
       30,0 * * * *  bash quickNote.sh -a
       ```
 
+
 - [x]  screenshots to notion Inbox
-- [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
-  - [ ]  periodically check for out-of-sync problems
-- [x] create a widget for showing ticktick statistics
-  - endpoint for statistis => google sheets => google data studio => android app web widget
-- [ ]  copy of Daiylo App
-- [ ]  pocket finished Reads ⇒ dedicated notion DB
-- [ ]  sync Twitter DB
-  - [ ]  twitter sync followers
-  - [ ]  tweets from phone
-  - [ ]  auto publish tweets
-- [ ]  PC pomodoro timer
-- [ ]  API that expose all the tech notes (blogs) from notion
+
+- [x] create a [widget](https://datastudio.google.com/embed/reporting/d58d54aa-5a25-4392-bdaf-b80d3e3f45b7/page/tfcbC) for showing ticktick statistics
