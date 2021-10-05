@@ -31,3 +31,4 @@ personal Nodejs application for automating and linking several applications toge
   - [ ]  tweets from phone
   - [ ]  auto publish tweets
 - [ ]  PC pomodoro timer
+- [ ]  API that expose all the tech notes (blogs) from notion
