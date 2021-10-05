@@ -6,6 +6,7 @@ interface AuthServices {
 export interface NotionConfig {
 	inbox: string;
 	journal: string;
+	blog:string;
 }
 
 export interface TicktickConfig {

@@ -10,4 +10,7 @@ export default interface IFirestore {
 	addTask(task: Task): Promise<void>;
 	addSyncedInboxes(syncedInboxes: SyncedInboxes): Promise<void>;
 	updateTicktickAuth(auth: string): Promise<void>;
+
+	updateRecentBlogDate(date: Date): Promise<void>;
+	lastSeenBlogUpdate():Promise<Date>
 }
