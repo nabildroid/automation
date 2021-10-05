@@ -9,11 +9,19 @@ const CONFIG = "/general/config";
 const TASKS = "/tasks";
 const SYNCEDINBOXES = "/synced_inboxes";
 const BLOG = "/blog/last_update";
+const MODE = "/mode/";
 
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
 	constructor(client: firestore.Firestore) {
 		this.client = client;
+	}
+	
+	async reportMode(mode: string): Promise<void> {
+		await this.client.collection(MODE).add({
+			at: firestore.Timestamp.now(),
+			mode,
+		});
 	}
 
 	async updateRecentBlogDate(date: Date): Promise<void> {

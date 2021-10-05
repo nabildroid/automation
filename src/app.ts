@@ -20,6 +20,7 @@ import { today } from "./core/utils";
 import SyncNotionTicktickInboxes from "./routes/sync_notion_ticktick_inboxes";
 import TicktickGeneralStatistics from "./routes/tickitck_general_statistics";
 import NotionBlog from "./routes/notion_blog";
+import ReportMode from "./routes/report_mode";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -41,7 +42,8 @@ export default class App implements IApp {
 			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
 			["post", "/newNotionInbox", new NewNotionInbox(this)],
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
-			
+			["post", "/report", new ReportMode(this)],
+
 			["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
 			["get", "/techBlog", new NotionBlog(this)],
 		]);

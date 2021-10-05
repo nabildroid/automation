@@ -12,5 +12,7 @@ export default interface IFirestore {
 	updateTicktickAuth(auth: string): Promise<void>;
 
 	updateRecentBlogDate(date: Date): Promise<void>;
-	lastSeenBlogUpdate():Promise<Date>
+	lastSeenBlogUpdate(): Promise<Date>;
+
+	reportMode(mode: string): Promise<void>;
 }

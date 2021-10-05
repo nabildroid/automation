@@ -7,7 +7,6 @@ personal Nodejs application for automating and linking several applications toge
 - [ ] **In Progress** API that expose all the tech notes (blogs) from notion
   > Notion doesn't yet support all the block types. for instance Quote is not supported  
 - [ ]  Automate shortcut for uploading picture of the day
-
 - [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
   - [ ]  periodically check for out-of-sync problems
   - endpoint for statistis => google sheets => google data studio => android app web widget
@@ -25,6 +24,8 @@ personal Nodejs application for automating and linking several applications toge
 ## Done
 
 - [x]  pull up all completed tasks from TickTick and add them to your daily journal as a blocks
+
+- [X]  Report mode
 
 - [x]  add task to Notion Inbox ubuntu #1
   1. make a keyboard shortcut E.g. SUPER+Q that execute
