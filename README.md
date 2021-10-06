@@ -13,6 +13,7 @@ personal Nodejs application for automating and linking several applications toge
 - [ ]  pocket finished Reads ⇒ dedicated notion DB
 
   > pocket doesn't provide an API for extracting highlights, so its kinda useless
+ 
   > **weekly script for extracting**
 
 - [ ]  sync Twitter DB
