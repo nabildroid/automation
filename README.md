@@ -9,11 +9,11 @@ personal Nodejs application for automating and linking several applications toge
 - [ ]  Automate shortcut for uploading picture of the day
 - [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
   - [ ]  periodically check for out-of-sync problems
-  - endpoint for statistis => google sheets => google data studio => android app web widget
 - ~~copy of Daiylo App~~
 - [ ]  pocket finished Reads ⇒ dedicated notion DB
 
   > pocket doesn't provide an API for extracting highlights, so its kinda useless
+  > **weekly script for extracting**
 
 - [ ]  sync Twitter DB
   - [ ]  twitter sync followers
@@ -44,3 +44,4 @@ personal Nodejs application for automating and linking several applications toge
 - [x]  screenshots to notion Inbox
 
 - [x] create a [widget](https://datastudio.google.com/embed/reporting/d58d54aa-5a25-4392-bdaf-b80d3e3f45b7/page/tfcbC) for showing ticktick statistics
+  - endpoint for statistics => google sheets => google data studio => android app web widget
