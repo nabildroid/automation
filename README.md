@@ -4,7 +4,7 @@ personal Nodejs application for automating and linking several applications toge
 
 ## Todos
 
-- [ ] API that expose Spaced Repetition DB from notion
+- [ ] API that expose Spaced Repetition DB from notion => consumed by [flashcards flutter application](https://github.com/nabildroid/flashcards)
 - [ ] API that expose all the tech notes (blogs) from notion
   > Notion doesn't yet support all the block types. for instance Quote is not supported  
 - [ ]  Automate shortcut for uploading picture of the day
