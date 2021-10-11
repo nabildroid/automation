@@ -4,7 +4,8 @@ personal Nodejs application for automating and linking several applications toge
 
 ## Todos
 
-- [ ] **In Progress** API that expose all the tech notes (blogs) from notion
+- [ ] API that expose Spaced Repetition DB from notion
+- [ ] API that expose all the tech notes (blogs) from notion
   > Notion doesn't yet support all the block types. for instance Quote is not supported  
 - [ ]  Automate shortcut for uploading picture of the day
 - [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
