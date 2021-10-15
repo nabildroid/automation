@@ -1,7 +1,12 @@
 import { firestore } from "firebase-admin";
+import flashcard_score, {
+  FlashcardProgress,
+} from "../core/entities/flashcard_score";
 import Task from "../core/entities/task";
 import task from "../core/entities/task";
 import AppConfig from "../entities/app_config";
+import NotionFlashcard from "../entities/notion_flashcard";
+import StoredFlashcard from "../entities/storedFlashcard";
 import syncedInboxes from "../entities/syncedInboxes";
 import IFirestore from "./contracts/iFirestore";
 
@@ -10,6 +15,8 @@ const TASKS = "/tasks";
 const SYNCEDINBOXES = "/synced_inboxes";
 const BLOG = "/blog/last_update";
 const MODE = "/mode/";
+const FLASHCARD = "/flashcards/";
+const FLASHCARD_SCORE = "/flashcard_score/";
 
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
@@ -17,6 +24,73 @@ export default class Firestore implements IFirestore {
 		this.client = client;
 	}
 	
+  async addFlashcardScore(score: flashcard_score): Promise<void> {
+    await this.client.collection(FLASHCARD_SCORE).add(score);
+  }
+
+  async getFlashcards(): Promise<StoredFlashcard[]> {
+    const flashcards = await this.client.collection(FLASHCARD).get();
+
+    const list = flashcards.docs
+      .map<any>((d) => ({ ...d.data(), id: d.id }))
+      .map((d) => ({
+        ...d,
+        created: d.created.toDate(),
+        updated: d.updated.toDate(),
+      }));
+
+    return list as StoredFlashcard[];
+  }
+
+  async updateFlashcardProgress(
+    id: string,
+    progress: FlashcardProgress
+  ): Promise<void> {
+    await this.client.collection(FLASHCARD).doc(id).update({
+      progress,
+    });
+  }
+  async updateFlashcard(flashcard: NotionFlashcard): Promise<void> {
+    console.log(flashcard);
+    const query = await this.client
+      .collection(FLASHCARD)
+      .where("notionId", "==", flashcard.id)
+      .limit(1)
+      .get();
+
+    if (query.size > 0) {
+      const [doc] = query.docs;
+      doc.ref.update({
+        term: flashcard.term,
+        tags: flashcard.tags,
+        definition: flashcard.definition,
+        updated: firestore.Timestamp.fromDate(flashcard.edited),
+      });
+    }
+  }
+
+  async addFlashcard(flashcard: NotionFlashcard): Promise<void> {
+    const newCard: Omit<StoredFlashcard, "id"> = {
+      created: flashcard.created,
+      definition: flashcard.definition,
+      tags: flashcard.tags,
+      updated: flashcard.edited,
+      notionId: flashcard.id,
+      term: flashcard.term,
+      progress: {
+        ease: 1.3,
+        interval: 1,
+        repetitions: 0,
+      },
+    };
+
+    await this.client.collection(FLASHCARD).add(newCard);
+  }
+
+  async removeFlashcard(id: string): Promise<void> {
+    await this.client.doc(`${FLASHCARD}/${id}`).delete();
+  }
+
 	async reportMode(mode: string): Promise<void> {
 		await this.client.collection(MODE).add({
 			at: firestore.Timestamp.now(),

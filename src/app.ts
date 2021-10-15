@@ -21,6 +21,9 @@ import SyncNotionTicktickInboxes from "./routes/sync_notion_ticktick_inboxes";
 import TicktickGeneralStatistics from "./routes/tickitck_general_statistics";
 import NotionBlog from "./routes/notion_blog";
 import ReportMode from "./routes/report_mode";
+import Flashcards from "./routes/flashcards";
+import SaveFlashcardsScore from "./routes/save_flashcards_score";
+import SyncFlashcards from "./routes/sync_flashcards";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -43,9 +46,12 @@ export default class App implements IApp {
 			["post", "/newNotionInbox", new NewNotionInbox(this)],
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
 			["post", "/report", new ReportMode(this)],
+      ["post", "/flashcards", new SaveFlashcardsScore(this)],
 
 			["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
 			["get", "/techBlog", new NotionBlog(this)],
+      ["get", "/flashcards", new Flashcards(this)],
+      ["get", "/syncFlashcards", new SyncFlashcards(this)],
 		]);
 	}
 

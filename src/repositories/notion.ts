@@ -7,6 +7,7 @@ import TicktickTask from "../entities/ticktick_task";
 import { Block } from "@notionhq/client/build/src/api-types";
 import NotionBlog, { NotionBlogContent } from "../entities/notion_blog";
 import { PropertyValueMap } from "@notionhq/client/build/src/api-endpoints";
+import NotionFlashcard from "../entities/notion_flashcard";
 
 export default class Notion implements INotion {
 	private readonly client: Client;
@@ -17,6 +18,23 @@ export default class Notion implements INotion {
 		});
 		this.config = config;
 	}
+
+  async getFlashcards(): Promise<NotionFlashcard[]> {
+    const flashcards = await this.client.databases.query({
+      database_id: this.config.flashcard,
+    });
+
+    const list = flashcards.results.map<NotionFlashcard>((page) => ({
+      id: page.id,
+      edited: new Date(page.last_edited_time),
+      created: new Date(page.created_time),
+      definition: Notion.extractProperty<string>("definition", page.properties),
+      term: Notion.extractProperty<string>("term", page.properties),
+      tags: Notion.extractProperty<string[]>("tags", page.properties),
+    }));
+
+    return list;
+  }
 
 	async listBlog(): Promise<NotionBlog[]> {
 		const blogs = await this.client.databases.query({
@@ -264,6 +282,11 @@ export default class Notion implements INotion {
 					.map((v) => v.plain_text)
 					.join(" ")
 					.trim() as T;
+      case "rich_text":
+        return prop.rich_text
+          .map((v) => v.plain_text)
+          .join(" ")
+          .trim() as T;
 			case "checkbox":
 				return prop.checkbox as T;
 			case "created_time":

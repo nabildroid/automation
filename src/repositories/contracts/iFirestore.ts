@@ -1,5 +1,10 @@
+import FlashcardScore, {
+  FlashcardProgress,
+} from "../../core/entities/flashcard_score";
 import Task from "../../core/entities/task";
 import AppConfig from "../../entities/app_config";
+import NotionFlashcard from "../../entities/notion_flashcard";
+import StoredFlashcard from "../../entities/storedFlashcard";
 import SyncedInboxes from "../../entities/syncedInboxes";
 
 export default interface IFirestore {
@@ -15,4 +20,14 @@ export default interface IFirestore {
 	lastSeenBlogUpdate(): Promise<Date>;
 
 	reportMode(mode: string): Promise<void>;
+
+  getFlashcards(): Promise<StoredFlashcard[]>;
+  updateFlashcardProgress(
+    id: string,
+    progress: FlashcardProgress
+  ): Promise<void>;
+  updateFlashcard(flashcard: NotionFlashcard): Promise<void>;
+  addFlashcard(flashcard: NotionFlashcard): Promise<void>;
+  removeFlashcard(id: string): Promise<void>;
+  addFlashcardScore(score: FlashcardScore): Promise<void>;
 }
