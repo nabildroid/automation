@@ -94,7 +94,7 @@ export default class Firestore implements IFirestore {
   }
 
   async removeFlashcard(id: string): Promise<void> {
-    await this.client.doc(`${FLASHCARD}/${id}`).delete();
+    await this.client.collection(FLASHCARD).doc(id).delete();
   }
 
 	async reportMode(mode: string): Promise<void> {
