@@ -7,4 +7,5 @@ export default interface StoredFlashcard extends Flashcard {
   created: Date;
   updated: Date;
   progress: FlashcardProgress;
+  boosted?:boolean;
 }

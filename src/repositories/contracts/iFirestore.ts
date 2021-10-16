@@ -30,4 +30,5 @@ export default interface IFirestore {
   addFlashcard(flashcard: NotionFlashcard): Promise<void>;
   removeFlashcard(id: string): Promise<void>;
   addFlashcardScore(score: FlashcardScore): Promise<void>;
+  updateSpecialFlashcard(id: string, boosted: boolean): Promise<void>;
 }

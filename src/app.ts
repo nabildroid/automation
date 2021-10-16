@@ -24,6 +24,7 @@ import ReportMode from "./routes/report_mode";
 import Flashcards from "./routes/flashcards";
 import SaveFlashcardsScore from "./routes/save_flashcards_score";
 import SyncFlashcards from "./routes/sync_flashcards";
+import UpdateSpecialFlashcard from "./routes/update_special_flashcard";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -47,6 +48,7 @@ export default class App implements IApp {
 			["post", "/uploadScreenshot", new uploadScreenshot(this)],
 			["post", "/report", new ReportMode(this)],
       ["post", "/flashcards", new SaveFlashcardsScore(this)],
+      ["post", "/updateSpecialFlashcard", new UpdateSpecialFlashcard(this)],
 
 			["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
 			["get", "/techBlog", new NotionBlog(this)],

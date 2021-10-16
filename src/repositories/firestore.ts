@@ -16,7 +16,7 @@ const SYNCEDINBOXES = "/synced_inboxes";
 const BLOG = "/blog/last_update";
 const MODE = "/mode/";
 const FLASHCARD = "/flashcards/";
-const FLASHCARD_SCORE = "/flashcard_score/";
+const FLASHCARD_SCORE = "/flashcard_score";
 
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
@@ -24,6 +24,12 @@ export default class Firestore implements IFirestore {
 		this.client = client;
 	}
 	
+  async updateSpecialFlashcard(id: string, boosted: boolean): Promise<void> {
+    await this.client.collection(FLASHCARD).doc(id).update({
+      boosted,
+    });
+  }
+
   async addFlashcardScore(score: flashcard_score): Promise<void> {
     await this.client.collection(FLASHCARD_SCORE).add(score);
   }
