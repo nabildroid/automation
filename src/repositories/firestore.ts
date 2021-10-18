@@ -23,6 +23,22 @@ export default class Firestore implements IFirestore {
 	constructor(client: firestore.Firestore) {
 		this.client = client;
 	}
+  async getFlashcardsScores(): Promise<flashcard_score[]> {
+    const query = await this.client.collection(FLASHCARD_SCORE).get();
+    return query.docs.map((doc) => {
+      const data = doc.data();
+      console.log(data);
+      return {
+        ...data,
+        startTime: new Date(data.startTime),
+        endTime:  new Date(data.endTime),
+        cards: (data.cards as any[]).map((d) => ({
+          ...d,
+          time:  new Date(d.time),
+        })),
+      };
+    });
+  }
 	
   async updateSpecialFlashcard(id: string, boosted: boolean): Promise<void> {
     await this.client.collection(FLASHCARD).doc(id).update({

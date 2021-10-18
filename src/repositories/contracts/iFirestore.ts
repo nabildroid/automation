@@ -31,4 +31,5 @@ export default interface IFirestore {
   removeFlashcard(id: string): Promise<void>;
   addFlashcardScore(score: FlashcardScore): Promise<void>;
   updateSpecialFlashcard(id: string, boosted: boolean): Promise<void>;
+  getFlashcardsScores(): Promise<FlashcardScore[]>;
 }
