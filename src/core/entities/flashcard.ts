@@ -4,3 +4,12 @@ export default interface Flashcard {
   tags: string[];
 }
 
+export interface FlashcardProgress {
+  interval: number;
+  ease: number;
+  repetitions: number;
+}
+
+export interface FlashcardSpecial {
+  boosted: boolean;
+}

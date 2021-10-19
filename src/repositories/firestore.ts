@@ -1,54 +1,44 @@
 import { firestore } from "firebase-admin";
-import flashcard_score, {
+import {
   FlashcardProgress,
+  FlashcardSpecial,
+} from "../core/entities/flashcard";
+import flashcard_score, {
+  FlashcardStatistics,
 } from "../core/entities/flashcard_score";
 import Task from "../core/entities/task";
 import task from "../core/entities/task";
+import { mergeFlashcardStatistics } from "../core/utils";
 import AppConfig from "../entities/app_config";
 import NotionFlashcard from "../entities/notion_flashcard";
-import StoredFlashcard from "../entities/storedFlashcard";
+import StoredFlashcard, {
+  StoredFlashcardProgress,
+  StoredFlashcardSpecial,
+  StoredFlashcardStatistics,
+} from "../entities/storedFlashcard";
 import syncedInboxes from "../entities/syncedInboxes";
-import IFirestore from "./contracts/iFirestore";
+import IFirestore, {
+  FlashcardUpdates,
+  getFlashcardsParams,
+} from "./contracts/iFirestore";
 
 const CONFIG = "/general/config";
 const TASKS = "/tasks";
 const SYNCEDINBOXES = "/synced_inboxes";
 const BLOG = "/blog/last_update";
 const MODE = "/mode/";
+
 const FLASHCARD = "/flashcards/";
 const FLASHCARD_SCORE = "/flashcard_score";
+const FLASHCARD_PROGRESS = "/flashcard_progress";
+const FLASHCARD_SPECIAL = "/flashcard_special";
+const FLASHCARD_STATISTICS = "/flashcard_statistics";
 
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
 	constructor(client: firestore.Firestore) {
 		this.client = client;
 	}
-  async getFlashcardsScores(): Promise<flashcard_score[]> {
-    const query = await this.client.collection(FLASHCARD_SCORE).get();
-    return query.docs.map((doc) => {
-      const data = doc.data();
-      console.log(data);
-      return {
-        ...data,
-        startTime: new Date(data.startTime),
-        endTime:  new Date(data.endTime),
-        cards: (data.cards as any[]).map((d) => ({
-          ...d,
-          time:  new Date(d.time),
-        })),
-      };
-    });
-  }
-	
-  async updateSpecialFlashcard(id: string, boosted: boolean): Promise<void> {
-    await this.client.collection(FLASHCARD).doc(id).update({
-      boosted,
-    });
-  }
-
-  async addFlashcardScore(score: flashcard_score): Promise<void> {
-    await this.client.collection(FLASHCARD_SCORE).add(score);
-  }
 
   async getFlashcards(): Promise<StoredFlashcard[]> {
     const flashcards = await this.client.collection(FLASHCARD).get();
@@ -64,14 +54,151 @@ export default class Firestore implements IFirestore {
     return list as StoredFlashcard[];
   }
 
-  async updateFlashcardProgress(
-    id: string,
-    progress: FlashcardProgress
-  ): Promise<void> {
-    await this.client.collection(FLASHCARD).doc(id).update({
-      progress,
+  async getFlashcardsScores(): Promise<flashcard_score[]> {
+    const query = await this.client.collection(FLASHCARD_SCORE).get();
+    return query.docs.map((doc) => {
+      const data = doc.data();
+      console.log(data);
+      return {
+        ...data,
+        startTime: new Date(data.startTime),
+        endTime: new Date(data.endTime),
+        cards: (data.cards as any[]).map((d) => ({
+          ...d,
+          time: new Date(d.time),
+        })),
+      };
     });
   }
+	
+  async updateSpecialFlashcard(
+    id: string,
+    content: FlashcardSpecial,
+    date: Date
+  ): Promise<void> {
+    await this.client
+      .collection(FLASHCARD_SPECIAL)
+      .doc(id)
+      .set({
+        // might create an error because the doc is not yet created!
+        ...content,
+        updated: firestore.Timestamp.fromDate(date),
+    });
+  }
+
+  async addFlashcardScore(
+    score: flashcard_score,
+    statistics: FlashcardStatistics
+  ): Promise<void> {
+    const query = await this.client
+      .collection(FLASHCARD_STATISTICS)
+      .where(
+        "updated",
+        ">=",
+        firestore.Timestamp.fromDate(new Date(new Date().toDateString()))
+      )
+      .limit(1)
+      .get();
+
+    if (query.empty) {
+      await this.client.collection(FLASHCARD_STATISTICS).add({
+        ...statistics,
+        updated: firestore.Timestamp.fromDate(statistics.date),
+      });
+    } else {
+      const doc = query.docs[0];
+      const merged = mergeFlashcardStatistics(doc.data() as any, statistics);
+
+      await this.client
+        .collection(FLASHCARD_STATISTICS)
+        .doc(doc.id)
+        .set({
+          ...merged,
+          updated: firestore.Timestamp.fromDate(merged.date),
+        });
+    }
+
+    await this.client.collection(FLASHCARD_SCORE).add(score);
+  }
+
+  async getFlashcardUpdates(
+    since: getFlashcardsParams
+  ): Promise<FlashcardUpdates> {
+    const queryCards = await this.client
+      .collection(FLASHCARD)
+      .where("updated", ">", firestore.Timestamp.fromDate(since.cards_since))
+      .get();
+
+    const queryProgress = await this.client
+      .collection(FLASHCARD_PROGRESS)
+      .where("updated", ">", firestore.Timestamp.fromDate(since.progress_since))
+      .get();
+
+    const queryStatistics = await this.client
+      .collection(FLASHCARD_STATISTICS)
+      .where(
+        "updated",
+        ">",
+        firestore.Timestamp.fromDate(since.statistics_since)
+      )
+      .get();
+
+    const querySpecial = await this.client
+      .collection(FLASHCARD_SPECIAL)
+      .where("updated", ">", firestore.Timestamp.fromDate(since.special_since))
+      .get();
+
+    return {
+      cards: queryCards.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          created: data.created.toDate(),
+          updated: data.updated.toDate(),
+          id: doc.id,
+        } as StoredFlashcard;
+      }),
+      progress: queryProgress.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          flashcardId: doc.id,
+          updated: data.updated.toDate(),
+        } as StoredFlashcardProgress;
+      }),
+      special: querySpecial.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          flashcardId: doc.id,
+          updated: data.updated.toDate(),
+        } as StoredFlashcardSpecial;
+      }),
+      statistics: queryStatistics.docs.map((doc) => {
+        const data = doc.data();
+        return {
+          ...data,
+          updated: data.updated.toDate(),
+        } as StoredFlashcardStatistics;
+      }),
+      delete: [],
+    };
+  }
+
+  async updateFlashcardProgress(
+    id: string,
+    date: Date,
+    progress: FlashcardProgress
+  ): Promise<void> {
+    await this.client
+      .collection(FLASHCARD_PROGRESS)
+      .doc(id)
+      .set({
+        ...progress,
+        updated: firestore.Timestamp.fromDate(date),
+    });
+  }
+
   async updateFlashcard(flashcard: NotionFlashcard): Promise<void> {
     console.log(flashcard);
     const query = await this.client
@@ -99,17 +226,13 @@ export default class Firestore implements IFirestore {
       updated: flashcard.edited,
       notionId: flashcard.id,
       term: flashcard.term,
-      progress: {
-        ease: 1.3,
-        interval: 1,
-        repetitions: 0,
-      },
     };
 
     await this.client.collection(FLASHCARD).add(newCard);
   }
 
   async removeFlashcard(id: string): Promise<void> {
+    // save thid id somewhere, to sync all the cleints with the deleted cards
     await this.client.collection(FLASHCARD).doc(id).delete();
   }
 

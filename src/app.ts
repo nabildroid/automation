@@ -25,7 +25,6 @@ import Flashcards from "./routes/flashcards";
 import SaveFlashcardsScore from "./routes/save_flashcards_score";
 import SyncFlashcards from "./routes/sync_flashcards";
 import UpdateSpecialFlashcard from "./routes/update_special_flashcard";
-import FlashcardStats from "./routes/flashcard_stats";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -55,7 +54,6 @@ export default class App implements IApp {
 			["get", "/techBlog", new NotionBlog(this)],
       ["get", "/flashcards", new Flashcards(this)],
       ["get", "/syncFlashcards", new SyncFlashcards(this)],
-      ["get", "/flashcardsStats", new FlashcardStats(this)],
 		]);
 	}
 
