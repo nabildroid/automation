@@ -12,11 +12,13 @@ personal Nodejs application for automating and linking several applications toge
   - [ ]  periodically check for out-of-sync problems
 - ~~copy of Daiylo App~~
 - [ ]  pocket finished Reads ⇒ dedicated notion DB
-
-  > pocket doesn't provide an API for extracting highlights, so its kinda useless
- 
+- [ ] highlights to notion db
+  > pocket doesn't provide an API for extracting highlights, so its kinda useless 
+  > only me and pocket developers know what is "It will take more than a doctor to prescribe a remedy" 😎
+  
   > **weekly script for extracting**
-
+  
+- [ ] Ubuntu Pomodoro widget in the top bar connected with ticktick pomodoro & allows the option to select a focus task 
 - [ ]  sync Twitter DB
   - [ ]  twitter sync followers
   - [ ]  tweets from phone
