@@ -5,17 +5,21 @@ personal Nodejs application for automating and linking several applications toge
 ## Todos
 
 - [ ] API that expose all the tech notes (blogs) from notion
-  > Notion doesn't yet support all the block types. for instance Quote is not supported  
+  > ~~Notion doesn't yet support all the block types. for instance Quote is not supported  ~~
+  > https://developers.notion.com/changelog/callouts-and-quote-blocks-are-now-supported
 - [ ]  Automate shortcut for uploading picture of the day
 - [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
   - [ ]  periodically check for out-of-sync problems
 - ~~copy of Daiylo App~~
 - [ ]  pocket finished Reads ⇒ dedicated notion DB
-
-  > pocket doesn't provide an API for extracting highlights, so its kinda useless
- 
+- [ ] highlights to notion db
+  > pocket doesn't provide an API for extracting highlights, so its kinda useless 
+  > only me and pocket developers know what is "It will take more than a doctor to prescribe a remedy" 😎
+  
   > **weekly script for extracting**
-
+  
+- [ ] Ubuntu Pomodoro widget in the top bar connected with ticktick pomodoro & allows the option to select a focus task 
+  > gnome-shell offers js/css interface to build those custom stuff, [Example](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/)
 - [ ]  sync Twitter DB
   - [ ]  twitter sync followers
   - [ ]  tweets from phone
