@@ -228,7 +228,13 @@ export default class Firestore implements IFirestore {
       term: flashcard.term,
     };
 
-    await this.client.collection(FLASHCARD).add(newCard);
+    const { id } = await this.client.collection(FLASHCARD).add(newCard);
+    // todo create a default progress outside this class
+    this.updateFlashcardProgress(id, newCard.updated, {
+      ease: 1.3,
+      interval: 1,
+      repetitions: 0,
+    });
   }
 
   async removeFlashcard(id: string): Promise<void> {
