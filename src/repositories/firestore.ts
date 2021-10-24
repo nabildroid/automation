@@ -65,7 +65,7 @@ export default class Firestore implements IFirestore {
       checked: check.checked,
       highlighIds: check.highlighIds.length
         ? firestore.FieldValue.arrayUnion(...check.highlighIds)
-        : [],
+        : null,
     });
   }
 
