@@ -1,0 +1,22 @@
+export default interface PocketArticle{
+    id:string;
+    completed:boolean,
+    created:Date,
+    updated:Date,
+    read?:Date,
+    title:string,
+    url:string,
+    summary:string;
+    wordCount:number,
+    duration:number,
+    language:string,
+    topImage:string,
+    tags:string[],
+    images:string[],
+    highlights:{
+        id:string,
+        text:string,
+        version:number,
+        created:Date,
+    }[],
+}
