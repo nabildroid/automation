@@ -60,10 +60,12 @@ export default class Firestore implements IFirestore {
       };
   }
 
-  async checkPocket(check:PocketCheck): Promise<void> {
+  async checkPocket(check: PocketCheck): Promise<void> {
     await this.client.doc(POCKET).update({
       checked: check.checked,
-      highlighIds:firestore.FieldValue.arrayUnion(...check.highlighIds),
+      highlighIds: check.highlighIds.length
+        ? firestore.FieldValue.arrayUnion(...check.highlighIds)
+        : [],
     });
   }
 
