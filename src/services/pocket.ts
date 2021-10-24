@@ -47,14 +47,17 @@ export default class PocketClient {
           completed: item["status"] == "1",
           created: new Date(parseInt(item["time_added"]) * 1000),
           updated: new Date(parseInt(item["time_updated"]) * 1000),
-          read: item["time_read"] == "0" ? null : new Date(item["time_read"]),
-          title: item["resolved_title"],
-          url: item["resolved_url"],
-          summary: item["excerpt"],
+          read:
+            item["time_read"] == "0"
+              ? null
+              : new Date(parseInt(item["time_read"]) * 1000),
+          title: item["resolved_title"] || "",
+          url: item["resolved_url"] || "",
+          summary: item["excerpt"] || "",
           wordCount: parseInt(item["word_count"]),
           duration: parseInt(item["time_to_read"]),
-          language: item["lang"],
-          topImage: item["top_image_url"],
+          language: item["lang"] || "",
+          topImage: item["top_image_url"] || "",
           tags: Object.keys(item["tags"] || {}),
           images: Object.values<any>(item["images"] || {}).map((i) => i["src"]),
           highlights: ((item["annotations"] as any[]) || []).map((a) => ({

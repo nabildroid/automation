@@ -5,9 +5,11 @@ import {
 import FlashcardScore, {
   FlashcardStatistics,
 } from "../../core/entities/flashcard_score";
+import PocketCheck from "../../core/entities/pocket_check";
 import Task from "../../core/entities/task";
 import AppConfig from "../../entities/app_config";
 import NotionFlashcard from "../../entities/notion_flashcard";
+import PocketArticle from "../../entities/pocket_article";
 import StoredFlashcard, {
   StoredFlashcardProgress,
   StoredFlashcardSpecial,
@@ -69,4 +71,10 @@ export default interface IFirestore {
   ): Promise<void>;
 
   getFlashcardsScores(): Promise<FlashcardScore[]>;
+
+  pocketChecked(): Promise<PocketCheck>;
+  checkPocket(check: PocketCheck): Promise<void>;
+
+  savePocketArticle(article: PocketArticle[]): Promise<void>;
+  getPocketArticles(after?: Date): Promise<PocketArticle[]>;
 }

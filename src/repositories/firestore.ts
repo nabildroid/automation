@@ -6,11 +6,13 @@ import {
 import flashcard_score, {
   FlashcardStatistics,
 } from "../core/entities/flashcard_score";
+import PocketCheck from "../core/entities/pocket_check";
 import Task from "../core/entities/task";
 import task from "../core/entities/task";
 import { mergeFlashcardStatistics } from "../core/utils";
 import AppConfig from "../entities/app_config";
 import NotionFlashcard from "../entities/notion_flashcard";
+import pocket_article from "../entities/pocket_article";
 import StoredFlashcard, {
   StoredFlashcardProgress,
   StoredFlashcardSpecial,
@@ -34,11 +36,80 @@ const FLASHCARD_PROGRESS = "/flashcard_progress";
 const FLASHCARD_SPECIAL = "/flashcard_special";
 const FLASHCARD_STATISTICS = "/flashcard_statistics";
 
+const POCKET = "/general/pocket";
+const POCKET_ARTICLES = "/pocket_articles";
+
 export default class Firestore implements IFirestore {
 	private readonly client: firestore.Firestore;
 	constructor(client: firestore.Firestore) {
 		this.client = client;
 	}
+
+  async pocketChecked(): Promise<PocketCheck> {
+    const query = await this.client.doc(POCKET).get();
+    const data = query.data();
+    if (data) {
+      return {
+        checked: data.checked.toDate(),
+        highlighIds: data.highlighIds,
+      };
+    } else
+      return {
+        checked: new Date(-1),
+        highlighIds: [],
+      };
+  }
+
+  async checkPocket(check:PocketCheck): Promise<void> {
+    await this.client.doc(POCKET).update({
+      checked: check.checked,
+      highlighIds:firestore.FieldValue.arrayUnion(check.highlighIds),
+    });
+  }
+
+  async savePocketArticle(articles: pocket_article[]): Promise<void> {
+    for (const arcticle of articles) {
+      
+      await this.client
+        .collection(POCKET_ARTICLES)
+        .doc(arcticle.id)
+        .set({
+          ...arcticle,
+          created: firestore.Timestamp.fromDate(arcticle.created),
+          updated: firestore.Timestamp.fromDate(arcticle.updated),
+          read: arcticle.read
+            ? firestore.Timestamp.fromDate(arcticle.read)
+            : null,
+          highlights: arcticle.highlights.map((h) => ({
+            ...h,
+            created: firestore.Timestamp.fromDate(h.created),
+          })),
+        });
+    }
+  }
+
+  async getPocketArticles(after?: Date): Promise<pocket_article[]> {
+    let query = await this.client
+      .collection(POCKET_ARTICLES)
+      .where("read", ">=", firestore.Timestamp.fromDate(after || new Date(-1)))
+      .get();
+
+    if (query.empty) return [];
+
+    return query.docs.map((doc) => {
+      const data = doc as any;
+      return {
+        updated: data.updated.toDate(),
+        created: data.completed.toDate(),
+        read: data.read?.toDate(),
+
+        highlights: (data.highlights as any[]).map((h) => ({
+          ...h,
+          created: h.created.toDate(),
+        })),
+      } as pocket_article;
+    });
+  }
 
   async getFlashcards(): Promise<StoredFlashcard[]> {
     const flashcards = await this.client.collection(FLASHCARD).get();
