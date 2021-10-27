@@ -19,7 +19,7 @@ export default class SaveFlashcardsScore implements IRoute {
       startTime: new Date(req.body.startTime),
       endTime: new Date(req.body.endTime),
     } as FlashcardScore;
-
+    
     const statistics = this.mergeScoreIntoStatistics(score);
     await this.app.db.addFlashcardScore(score, statistics);
     const promises = score.cards.map((card) =>
@@ -36,10 +36,11 @@ export default class SaveFlashcardsScore implements IRoute {
   }
 
   mergeScoreIntoStatistics(score: FlashcardScore): FlashcardStatistics {
+    
     const { startTime } = score;
 
     const states = score.cards.reduce((acc, v) => {
-      acc[v.state] = (acc[v.state] || 0) + 1;
+      acc[v.state] = acc[v.state] || 0;
 
       return acc;
     }, {} as { [key: number]: number });
