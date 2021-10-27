@@ -1,4 +1,5 @@
 import * as stream from "stream";
+import { firestore } from "firebase-admin";
 import { promisify } from "util";
 import Axios from "axios";
 const finished = promisify(stream.finished);
@@ -62,7 +63,6 @@ export function mergeFlashcardStatistics(
   old: FlashcardStatistics,
   n: FlashcardStatistics
 ) {
-
   const merged: FlashcardStatistics = {
     date: n.date,
     states: {},
@@ -76,4 +76,52 @@ export function mergeFlashcardStatistics(
   );
 
   return merged;
+}
+
+function recursiveConversion(
+  data: { [key: string]: any },
+  check: (value: any) => boolean,
+  convert: (value:any) => any
+) {
+  const result: any = {};
+
+  const keys = Object.keys(data);
+
+  for (const key of keys) {
+    const value = data[key];
+
+    if (check(value)) {
+      console.log(value);
+      result[key] = convert(value);
+      
+    } else if (!(value instanceof Array) && typeof value == "object") {
+      result[key] = anyDateToFirestore(value);
+    } else if (value instanceof Array) {
+      result[key] = value.map(anyDateToFirestore);
+    } else {
+      result[key] = value;
+    }
+  }
+
+  return result;
+}
+
+// todo use this function in firestore.ts
+// convert any dates within the @data to firestore timestamp
+export function anyDateToFirestore(data: { [key: string]: any }) {
+  return recursiveConversion(
+    data,
+    (x) => x instanceof Date,
+    (x) => firestore.Timestamp.fromDate(x)
+  );
+}
+
+// todo use this function in firestore.ts
+// convert any dates within the @data to firestore timestamp
+export function anyFirestoreToDate(data: { [key: string]: any }) {
+  return recursiveConversion(
+    data,
+    (x) => x instanceof firestore.Timestamp,
+    (x) => x.toDate()
+  );
 }

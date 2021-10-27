@@ -9,7 +9,7 @@ import flashcard_score, {
 import PocketCheck from "../core/entities/pocket_check";
 import Task from "../core/entities/task";
 import task from "../core/entities/task";
-import { mergeFlashcardStatistics } from "../core/utils";
+import { anyDateToFirestore, mergeFlashcardStatistics } from "../core/utils";
 import AppConfig from "../entities/app_config";
 import NotionFlashcard from "../entities/notion_flashcard";
 import pocket_article from "../entities/pocket_article";
@@ -191,7 +191,9 @@ export default class Firestore implements IFirestore {
         });
     }
 
-    await this.client.collection(FLASHCARD_SCORE).add(score);
+    await this.client
+      .collection(FLASHCARD_SCORE)
+      .add(anyDateToFirestore(score));
   }
 
   async getFlashcardUpdates(
