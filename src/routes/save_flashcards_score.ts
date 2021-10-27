@@ -41,7 +41,7 @@ export default class SaveFlashcardsScore implements IRoute {
     const { startTime } = score;
 
     const states = score.cards.reduce((acc, v) => {
-      acc[v.state] = acc[v.state] || 0;
+      acc[v.state] = (acc[v.state] || 0) + 1;
 
       return acc;
     }, {} as { [key: number]: number });
