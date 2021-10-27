@@ -14,7 +14,7 @@ personal Nodejs application for automating and linking several applications toge
   
 - [ ] Ubuntu Pomodoro widget in the top bar connected with ticktick pomodoro & allows the option to select a focus task 
   > gnome-shell offers js/css interface to build those custom stuff, [Example](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/)
-  
+- [ ] Ubuntu Pomodoro widget in the top bar for showing your ticktick score and level
 - [ ]  sync Twitter DB
   - [ ]  twitter sync followers
   - [ ]  tweets from phone
