@@ -160,33 +160,10 @@ export default class Firestore implements IFirestore {
   }
 
   async addFlashcardStatistic(statistics: FlashcardStatistics) {
-    const query = await this.client
-      .collection(FLASHCARD_STATISTICS)
-      .where(
-        "updated",
-        ">=",
-        firestore.Timestamp.fromDate(new Date(new Date().toDateString()))
-      )
-      .limit(1)
-      .get();
-
-    if (query.empty) {
       await this.client.collection(FLASHCARD_STATISTICS).add({
         ...statistics,
         updated: firestore.Timestamp.fromDate(statistics.date),
       });
-    } else {
-      const doc = query.docs[0];
-      const merged = mergeFlashcardStatistics(doc.data() as any, statistics);
-
-      await this.client
-        .collection(FLASHCARD_STATISTICS)
-        .doc(doc.id)
-        .set({
-          ...merged,
-          updated: firestore.Timestamp.fromDate(merged.date),
-        });
-    }
   }
   async addFlashcardScore(score: flashcard_score): Promise<void> {
     await this.client
