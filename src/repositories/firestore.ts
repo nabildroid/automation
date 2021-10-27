@@ -159,10 +159,7 @@ export default class Firestore implements IFirestore {
     });
   }
 
-  async addFlashcardScore(
-    score: flashcard_score,
-    statistics: FlashcardStatistics
-  ): Promise<void> {
+  async addFlashcardStatistic(statistics: FlashcardStatistics) {
     const query = await this.client
       .collection(FLASHCARD_STATISTICS)
       .where(
@@ -190,7 +187,8 @@ export default class Firestore implements IFirestore {
           updated: firestore.Timestamp.fromDate(merged.date),
         });
     }
-
+  }
+  async addFlashcardScore(score: flashcard_score): Promise<void> {
     await this.client
       .collection(FLASHCARD_SCORE)
       .add(anyDateToFirestore(score));

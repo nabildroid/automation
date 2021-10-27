@@ -27,69 +27,71 @@ import SyncFlashcards from "./routes/sync_flashcards";
 import UpdateSpecialFlashcard from "./routes/update_special_flashcard";
 import PocketClient from "./services/pocket";
 import SyncWithPocket from "./routes/sync_with_pocked";
+import syncOfflineFlashcards from "./routes/sync_offline_flashcards";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
 export default class App implements IApp {
-	db!: IFirestore;
-	notion!: INotion;
-	storage!: IStorage;
-	ticktick!: ITicktick;
+  db!: IFirestore;
+  notion!: INotion;
+  storage!: IStorage;
+  ticktick!: ITicktick;
   pocket!: PocketClient;
-	private config!: AppConfig;
+  private config!: AppConfig;
 
-	constructor(server: Express) {
-		this.configRoutes(server, [
-			[
-				"post",
-				"/syncNotionTicktickInboxes",
-				new SyncNotionTicktickInboxes(this),
-			],
+  constructor(server: Express) {
+    this.configRoutes(server, [
+      [
+        "post",
+        "/syncNotionTicktickInboxes",
+        new SyncNotionTicktickInboxes(this),
+      ],
 
-			["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
-			["post", "/newNotionInbox", new NewNotionInbox(this)],
-			["post", "/uploadScreenshot", new uploadScreenshot(this)],
-			["post", "/report", new ReportMode(this)],
+      ["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
+      ["post", "/newNotionInbox", new NewNotionInbox(this)],
+      ["post", "/uploadScreenshot", new uploadScreenshot(this)],
+      ["post", "/report", new ReportMode(this)],
       ["post", "/flashcards", new SaveFlashcardsScore(this)],
       ["post", "/updateSpecialFlashcard", new UpdateSpecialFlashcard(this)],
+      ["post", "/syncOfflineFlashcards", new syncOfflineFlashcards(this)],
 
-			["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
-			["get", "/techBlog", new NotionBlog(this)],
+      ["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
+      ["get", "/techBlog", new NotionBlog(this)],
       ["get", "/flashcards", new Flashcards(this)],
       ["get", "/syncFlashcards", new SyncFlashcards(this)],
       ["get", "/syncWithPocket", new SyncWithPocket(this)],
-		]);
-	}
+    ]);
+  }
 
-	private configRoutes(server: Express, routes: RouteConfig[]) {
-		routes.forEach((route) => {
-			const handler = route[2].handler.bind(route[2]);
-			if (route[0] == "get") {
-				server.get(route[1], handler);
-			} else if (route[0] == "post") {
-				server.post(route[1], handler);
-			}
-		});
-	}
+  private configRoutes(server: Express, routes: RouteConfig[]) {
+    routes.forEach((route) => {
+      const handler = route[2].handler.bind(route[2]);
+      if (route[0] == "get") {
+        server.get(route[1], handler);
+      } else if (route[0] == "post") {
+        server.post(route[1], handler);
+      }
+    });
+  }
 
-	async init(firestore: FirebaseFirestore.Firestore, bucket: Bucket) {
-		this.db = new Firestore(firestore);
-		this.config = await this.db.appConfig();
+  async init(firestore: FirebaseFirestore.Firestore, bucket: Bucket) {
+    this.db = new Firestore(firestore);
+    this.config = await this.db.appConfig();
     this.notion = new Notion(this.config.auth.notion, this.config.notionConfig);
-		this.storage = new Storage(bucket);
-    this.pocket =  new PocketClient(this.config.auth.pocket);
+    this.storage = new Storage(bucket);
+    this.pocket = new PocketClient(this.config.auth.pocket);
 
-		const ticktickClient = new TicktickClient(
-			this.config.ticktickConfig.email,
-			this.config.ticktickConfig.password,
-			this.db.updateTicktickAuth.bind(this.db),
-			{
-				auth: this.config.auth.ticktick,
-			}
-		);
+    const ticktickClient = new TicktickClient(
+      this.config.ticktickConfig.email,
+      this.config.ticktickConfig.password,
+      this.db.updateTicktickAuth.bind(this.db),
+      {
+        auth: this.config.auth.ticktick,
+      }
+    );
 
-		this.ticktick = new Ticktick(ticktickClient);
+    this.ticktick = new Ticktick(ticktickClient);
 
-		console.log(`#${this.config.title} has been initiated`);
-	}
+    console.log(`#${this.config.title} has been initiated`);
+  }
 }

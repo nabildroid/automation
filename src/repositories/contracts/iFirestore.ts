@@ -56,14 +56,15 @@ export default interface IFirestore {
     progress: FlashcardProgress
   ): Promise<void>;
 
-  updateFlashcard(flashcard: NotionFlashcard): Promise<void>;
+  updateFlashcard(
+    flashcard: Partial<NotionFlashcard> & { id: string }
+  ): Promise<void>;
   addFlashcard(flashcard: NotionFlashcard): Promise<void>;
   removeFlashcard(id: string): Promise<void>;
 
-  addFlashcardScore(
-    score: FlashcardScore,
-    statistics: FlashcardStatistics
-  ): Promise<void>;
+  addFlashcardScore(score: FlashcardScore): Promise<void>;
+  addFlashcardStatistic(statistics: FlashcardStatistics): Promise<void>;
+
   updateSpecialFlashcard(
     id: string,
     data: FlashcardSpecial,
