@@ -7,9 +7,12 @@ import flashcard_score, {
   FlashcardStatistics,
 } from "../core/entities/flashcard_score";
 import PocketCheck from "../core/entities/pocket_check";
-import Task from "../core/entities/task";
 import task from "../core/entities/task";
-import { anyDateToFirestore, mergeFlashcardStatistics } from "../core/utils";
+import {
+  anyDateToFirestore,
+  anyFirestoreToDate,
+  mergeFlashcardStatistics,
+} from "../core/utils";
 import AppConfig from "../entities/app_config";
 import NotionFlashcard from "../entities/notion_flashcard";
 import pocket_article from "../entities/pocket_article";
@@ -40,10 +43,10 @@ const POCKET = "/general/pocket";
 const POCKET_ARTICLES = "/pocket_articles";
 
 export default class Firestore implements IFirestore {
-	private readonly client: firestore.Firestore;
-	constructor(client: firestore.Firestore) {
-		this.client = client;
-	}
+  private readonly client: firestore.Firestore;
+  constructor(client: firestore.Firestore) {
+    this.client = client;
+  }
 
   async pocketChecked(): Promise<PocketCheck> {
     const query = await this.client.doc(POCKET).get();
@@ -71,22 +74,10 @@ export default class Firestore implements IFirestore {
 
   async savePocketArticle(articles: pocket_article[]): Promise<void> {
     for (const arcticle of articles) {
-      
       await this.client
         .collection(POCKET_ARTICLES)
         .doc(arcticle.id)
-        .set({
-          ...arcticle,
-          created: firestore.Timestamp.fromDate(arcticle.created),
-          updated: firestore.Timestamp.fromDate(arcticle.updated),
-          read: arcticle.read
-            ? firestore.Timestamp.fromDate(arcticle.read)
-            : null,
-          highlights: arcticle.highlights.map((h) => ({
-            ...h,
-            created: firestore.Timestamp.fromDate(h.created),
-          })),
-        });
+        .set(anyDateToFirestore(arcticle));
     }
   }
 
@@ -100,16 +91,7 @@ export default class Firestore implements IFirestore {
 
     return query.docs.map((doc) => {
       const data = doc as any;
-      return {
-        updated: data.updated.toDate(),
-        created: data.completed.toDate(),
-        read: data.read?.toDate(),
-
-        highlights: (data.highlights as any[]).map((h) => ({
-          ...h,
-          created: h.created.toDate(),
-        })),
-      } as pocket_article;
+      return anyFirestoreToDate(data) as pocket_article;
     });
   }
 
@@ -118,11 +100,7 @@ export default class Firestore implements IFirestore {
 
     const list = flashcards.docs
       .map<any>((d) => ({ ...d.data(), id: d.id }))
-      .map((d) => ({
-        ...d,
-        created: d.created.toDate(),
-        updated: d.updated.toDate(),
-      }));
+      .map(anyFirestoreToDate);
 
     return list as StoredFlashcard[];
   }
@@ -131,19 +109,10 @@ export default class Firestore implements IFirestore {
     const query = await this.client.collection(FLASHCARD_SCORE).get();
     return query.docs.map((doc) => {
       const data = doc.data();
-      console.log(data);
-      return {
-        ...data,
-        startTime: new Date(data.startTime),
-        endTime: new Date(data.endTime),
-        cards: (data.cards as any[]).map((d) => ({
-          ...d,
-          time: new Date(d.time),
-        })),
-      };
+      return anyFirestoreToDate(data);
     });
   }
-	
+
   async updateSpecialFlashcard(
     id: string,
     content: FlashcardSpecial,
@@ -152,18 +121,13 @@ export default class Firestore implements IFirestore {
     await this.client
       .collection(FLASHCARD_SPECIAL)
       .doc(id)
-      .set({
-        // might create an error because the doc is not yet created!
-        ...content,
-        updated: firestore.Timestamp.fromDate(date),
-    });
+      .set(anyDateToFirestore({ ...content, updated: date }));
   }
 
   async addFlashcardStatistic(statistics: FlashcardStatistics) {
-      await this.client.collection(FLASHCARD_STATISTICS).add({
-        ...statistics,
-        updated: firestore.Timestamp.fromDate(statistics.date),
-      });
+    await this.client
+      .collection(FLASHCARD_STATISTICS)
+      .add(anyDateToFirestore({ ...statistics, updated: statistics.date }));
   }
   async addFlashcardScore(score: flashcard_score): Promise<void> {
     await this.client
@@ -200,35 +164,30 @@ export default class Firestore implements IFirestore {
 
     return {
       cards: queryCards.docs.map((doc) => {
-        const data = doc.data();
+        const data = anyFirestoreToDate(doc.data());
         return {
           ...data,
-          created: data.created.toDate(),
-          updated: data.updated.toDate(),
           id: doc.id,
         } as StoredFlashcard;
       }),
       progress: queryProgress.docs.map((doc) => {
-        const data = doc.data();
+        const data = anyFirestoreToDate(doc.data());
         return {
           ...data,
           flashcardId: doc.id,
-          updated: data.updated.toDate(),
         } as StoredFlashcardProgress;
       }),
       special: querySpecial.docs.map((doc) => {
-        const data = doc.data();
+        const data = anyFirestoreToDate(doc.data());
         return {
           ...data,
           flashcardId: doc.id,
-          updated: data.updated.toDate(),
         } as StoredFlashcardSpecial;
       }),
       statistics: queryStatistics.docs.map((doc) => {
-        const data = doc.data();
+        const data = anyFirestoreToDate(doc.data());
         return {
           ...data,
-          updated: data.updated.toDate(),
         } as StoredFlashcardStatistics;
       }),
       delete: [],
@@ -243,10 +202,12 @@ export default class Firestore implements IFirestore {
     await this.client
       .collection(FLASHCARD_PROGRESS)
       .doc(id)
-      .set({
-        ...progress,
-        updated: firestore.Timestamp.fromDate(date),
-    });
+      .set(
+        anyDateToFirestore({
+          ...progress,
+          updated: date,
+        })
+      );
   }
 
   async updateFlashcard(flashcard: NotionFlashcard): Promise<void> {
@@ -259,12 +220,14 @@ export default class Firestore implements IFirestore {
 
     if (query.size > 0) {
       const [doc] = query.docs;
-      doc.ref.update({
-        term: flashcard.term,
-        tags: flashcard.tags,
-        definition: flashcard.definition,
-        updated: firestore.Timestamp.fromDate(flashcard.edited),
-      });
+      doc.ref.update(
+        anyDateToFirestore({
+          term: flashcard.term,
+          tags: flashcard.tags,
+          definition: flashcard.definition,
+          updated: flashcard.edited,
+        })
+      );
     }
   }
 
@@ -292,106 +255,102 @@ export default class Firestore implements IFirestore {
     await this.client.collection(FLASHCARD).doc(id).delete();
   }
 
-	async reportMode(mode: string): Promise<void> {
-		await this.client.collection(MODE).add({
-			at: firestore.Timestamp.now(),
-			mode,
-		});
-	}
+  async reportMode(mode: string): Promise<void> {
+    await this.client.collection(MODE).add({
+      at: firestore.Timestamp.now(),
+      mode,
+    });
+  }
 
-	async updateRecentBlogDate(date: Date): Promise<void> {
-		await this.client.doc(BLOG).set({
-			date: firestore.Timestamp.fromDate(date),
-		});
-	}
+  async updateRecentBlogDate(date: Date): Promise<void> {
+    await this.client.doc(BLOG).set(
+      anyDateToFirestore({
+        date,
+      })
+    );
+  }
 
-	async lastSeenBlogUpdate(): Promise<Date> {
-		const doc = await this.client.doc(BLOG).get();
-		const data = doc.data();
-		if (data) {
-			return (data.date as FirebaseFirestore.Timestamp).toDate();
-		} else {
-			return new Date("1970 01 01");
-		}
-	}
+  async lastSeenBlogUpdate(): Promise<Date> {
+    const doc = await this.client.doc(BLOG).get();
+    const data = doc.data();
+    if (data) {
+      return (data.date as FirebaseFirestore.Timestamp).toDate();
+    } else {
+      return new Date("1970 01 01");
+    }
+  }
 
-	async addSyncedInboxes(syncedInboxes: syncedInboxes): Promise<void> {
-		await this.client.collection(SYNCEDINBOXES).add(syncedInboxes);
-	}
-	async updateTicktickAuth(auth: string): Promise<void> {
-		await this.client.doc(CONFIG).update({
-			"auth.ticktick":auth,
-		});
-		
-	}
+  async addSyncedInboxes(syncedInboxes: syncedInboxes): Promise<void> {
+    await this.client.collection(SYNCEDINBOXES).add(syncedInboxes);
+  }
+  async updateTicktickAuth(auth: string): Promise<void> {
+    await this.client.doc(CONFIG).update({
+      "auth.ticktick": auth,
+    });
+  }
 
-	async getCompletedTasks(after?: Date) {
-		let ref = this.client.collection(TASKS).where("done", "==", true);
-		if (after) {
-			ref = ref.where(
-				"created",
-				">=",
-				firestore.Timestamp.fromDate(after)
-			);
-		}
+  async getCompletedTasks(after?: Date) {
+    let ref = this.client.collection(TASKS).where("done", "==", true);
+    if (after) {
+      ref = ref.where("created", ">=", firestore.Timestamp.fromDate(after));
+    }
 
-		const query = await ref.get();
+    const query = await ref.get();
 
-		return query.docs.map((d) => d.data()) as (task & { done: true })[];
-	}
+    return query.docs.map((d) => d.data()) as (task & { done: true })[];
+  }
 
-	async appConfig(): Promise<AppConfig> {
-		const doc = await this.client.doc(CONFIG).get();
-		const config = doc.data();
-		if (config) {
-			return this.validateConfig(config);
-		} else {
-			throw Error(
-				`application configuration doesn't exists in the provided database, path(${CONFIG}) is empty`
-			);
-		}
-	}
+  async appConfig(): Promise<AppConfig> {
+    const doc = await this.client.doc(CONFIG).get();
+    const config = doc.data();
+    if (config) {
+      return this.validateConfig(config);
+    } else {
+      throw Error(
+        `application configuration doesn't exists in the provided database, path(${CONFIG}) is empty`
+      );
+    }
+  }
 
-	getTasks(): Promise<task[]> {
-		throw new Error("Method not implemented.");
-	}
+  getTasks(): Promise<task[]> {
+    throw new Error("Method not implemented.");
+  }
 
-	async addTask(task: task): Promise<void> {
-		const exists = await this.getTask(task.id);
+  async addTask(task: task): Promise<void> {
+    const exists = await this.getTask(task.id);
 
-		// FIXME is it goo to throw time here without information the rest of the system
-		const taskWithTime = {
-			...task,
-			created: firestore.Timestamp.now(),
-		};
+    // FIXME is it goo to throw time here without information the rest of the system
+    const taskWithTime = {
+      ...task,
+      created: firestore.Timestamp.now(),
+    };
 
-		if (exists) {
-			await this.client.doc(`${TASKS}/${exists.id}`).update(taskWithTime);
-		} else {
-			await this.client.collection(TASKS).add(taskWithTime);
-		}
-	}
+    if (exists) {
+      await this.client.doc(`${TASKS}/${exists.id}`).update(taskWithTime);
+    } else {
+      await this.client.collection(TASKS).add(taskWithTime);
+    }
+  }
 
-	/**
-	 *
-	 * @param taskId it's not the document id, but rather a stored id withing the document it self
-	 */
-	private async getTask(taskId: string) {
-		const ref = this.client.collection(TASKS).where("id", "==", taskId);
-		const query = await ref.get();
+  /**
+   *
+   * @param taskId it's not the document id, but rather a stored id withing the document it self
+   */
+  private async getTask(taskId: string) {
+    const ref = this.client.collection(TASKS).where("id", "==", taskId);
+    const query = await ref.get();
 
-		if (query.size) {
-			return query.docs[0];
-		}
-	}
+    if (query.size) {
+      return query.docs[0];
+    }
+  }
 
-	private validateConfig(config: any): AppConfig {
-		// todo validate and create a default configuration
-		if (!(config as AppConfig).ticktickConfig.password) {
-			config.ticktickConfig.password =
-				process.env.TICKTICK_DEFAULT_PASSWORD;
-		}
+  private validateConfig(config: any): AppConfig {
+    // todo validate and create a default configuration
+    if (!(config as AppConfig).ticktickConfig.password) {
+      config.ticktickConfig.password = process.env.TICKTICK_DEFAULT_PASSWORD;
+    }
 
-		return config;
-	}
+    return config;
+  }
 }
