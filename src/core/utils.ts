@@ -81,9 +81,11 @@ export function mergeFlashcardStatistics(
 function recursiveConversion(
   data: { [key: string]: any },
   check: (value: any) => boolean,
-  convert: (value:any) => any
+  convert: (value: any) => any
 ) {
   const result: any = {};
+
+  if (typeof data != "object") return data;
 
   const keys = Object.keys(data);
 
@@ -91,13 +93,11 @@ function recursiveConversion(
     const value = data[key];
 
     if (check(value)) {
-      console.log(value);
       result[key] = convert(value);
-      
     } else if (!(value instanceof Array) && typeof value == "object") {
-      result[key] = anyDateToFirestore(value);
+      result[key] = recursiveConversion(value, check, convert);
     } else if (value instanceof Array) {
-      result[key] = value.map(anyDateToFirestore);
+      result[key] = value.map((v) => recursiveConversion(v, check, convert));
     } else {
       result[key] = value;
     }
