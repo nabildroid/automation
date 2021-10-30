@@ -102,6 +102,9 @@ export default class Notion implements INotion {
       definition: Notion.extractProperty<string>("definition", page.properties),
       term: Notion.extractProperty<string>("term", page.properties),
       tags: Notion.extractProperty<string[]>("tags", page.properties),
+      published:
+        Notion.extractProperty<string>("status", page.properties) ==
+        "published",
     }));
 
     return list;

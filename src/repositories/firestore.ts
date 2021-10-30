@@ -163,13 +163,16 @@ export default class Firestore implements IFirestore {
       .get();
 
     return {
-      cards: queryCards.docs.map((doc) => {
+      cards: queryCards.docs
+        .map((doc) => {
         const data = anyFirestoreToDate(doc.data());
         return {
           ...data,
           id: doc.id,
         } as StoredFlashcard;
-      }),
+        })
+        .filter((c) => c.published),
+      
       progress: queryProgress.docs.map((doc) => {
         const data = anyFirestoreToDate(doc.data());
         return {
@@ -190,7 +193,16 @@ export default class Firestore implements IFirestore {
           ...data,
         } as StoredFlashcardStatistics;
       }),
-      delete: [],
+      delete: queryCards.docs
+        .map((doc) => {
+          const data = anyFirestoreToDate(doc.data());
+          return {
+            ...data,
+            id: doc.id,
+          } as StoredFlashcard;
+        })
+        .filter((c) => !c.published)
+        .map((c) => c.id),
     };
   }
 
@@ -226,6 +238,7 @@ export default class Firestore implements IFirestore {
           tags: flashcard.tags,
           definition: flashcard.definition,
           updated: flashcard.edited,
+          published:flashcard.published,
         })
       );
     }
@@ -239,6 +252,7 @@ export default class Firestore implements IFirestore {
       updated: flashcard.edited,
       notionId: flashcard.id,
       term: flashcard.term,
+      published: flashcard.published,
     };
 
     const { id } = await this.client.collection(FLASHCARD).add(newCard);
