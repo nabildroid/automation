@@ -4,7 +4,7 @@ import INotion from "./contracts/iNotion";
 import { Client } from "@notionhq/client";
 import { NotionConfig } from "../entities/app_config";
 import TicktickTask from "../entities/ticktick_task";
-import { Block } from "@notionhq/client/build/src/api-types";
+import { Block, Page } from "@notionhq/client/build/src/api-types";
 import NotionBlog, { NotionBlogContent } from "../entities/notion_blog";
 import {
   InputPropertyValueMap,
@@ -82,11 +82,20 @@ export default class Notion implements INotion {
   }
 
   async getFlashcards(): Promise<NotionFlashcard[]> {
-    const flashcards = await this.client.databases.query({
+    const flashcards: Page[] = [];
+    let cursor: any = undefined;
+    while (true) {
+      const query = await this.client.databases.query({
       database_id: this.config.flashcard,
+        start_cursor: cursor,
     });
+      cursor = query.next_cursor;
+      flashcards.push(...query.results);
 
-    const list = flashcards.results.map<NotionFlashcard>((page) => ({
+      if (!query.has_more) break;
+    }
+
+    const list = flashcards.map<NotionFlashcard>((page) => ({
       id: page.id,
       edited: new Date(page.last_edited_time),
       created: new Date(page.created_time),
