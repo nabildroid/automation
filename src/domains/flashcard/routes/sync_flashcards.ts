@@ -1,20 +1,22 @@
-import IRoute from "../core/types/iroute";
-
 import { Request, Response } from "express";
+import { IRoute } from "../../../core/service";
 
-import IApp from "../core/contract/iapp";
-import NotionFlashcard from "../entities/notion_flashcard";
-import StoredFlashcard from "../entities/storedFlashcard";
+import NotionFlashcard from "../models/notion_flashcard";
+import StoredFlashcard from "../models/storedFlashcard";
+import Firestore from "../repositories/firestore";
+import Notion from "../repositories/notion";
 
 export default class SyncFlashcards implements IRoute {
-  readonly app: IApp;
-  constructor(app: IApp) {
-    this.app = app;
+  notion: Notion;
+  db: Firestore;
+  constructor(notion: Notion, db: Firestore) {
+    this.notion = notion;
+    this.db = db;
   }
 
   async handler(req: Request, res: Response) {
-    const notionFlashcards = await this.app.notion.getFlashcards();
-    const storedFlashcards = await this.app.db.getFlashcards();
+    const notionFlashcards = await this.notion.getFlashcards();
+    const storedFlashcards = await this.db.getFlashcards();
 
     const promises = [];
 
@@ -28,11 +30,9 @@ export default class SyncFlashcards implements IRoute {
       storedFlashcards
     );
     promises.push(
-      ...newCards.map((flashcard) => this.app.db.addFlashcard(flashcard)),
-      ...updatedCards.map((flashcard) =>
-        this.app.db.updateFlashcard(flashcard)
-      ),
-      ...removedFlashcardIds.map((id) => this.app.db.removeFlashcard(id))
+      ...newCards.map((flashcard) => this.db.addFlashcard(flashcard)),
+      ...updatedCards.map((flashcard) => this.db.updateFlashcard(flashcard)),
+      ...removedFlashcardIds.map((id) => this.db.removeFlashcard(id))
     );
 
     await Promise.all(promises);

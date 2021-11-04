@@ -1,16 +1,14 @@
-import IRoute from "../core/types/iroute";
-
 import { Request, Response } from "express";
 
-import IApp from "../core/contract/iapp";
-import FlashcardScore, {
-  FlashcardStatistics,
-} from "../core/entities/flashcard_score";
+import { IRoute } from "../../../core/service";
+
+import FlashcardScore, { FlashcardStatistics } from "../models/flashcard_score";
+import Firestore from "../repositories/firestore";
 
 export default class SaveFlashcardsScore implements IRoute {
-  readonly app: IApp;
-  constructor(app: IApp) {
-    this.app = app;
+  db: Firestore;
+  constructor(db: Firestore) {
+    this.db = db;
   }
 
   async handler(req: Request, res: Response) {
@@ -21,11 +19,11 @@ export default class SaveFlashcardsScore implements IRoute {
     } as FlashcardScore;
 
     const statistics = this.mergeScoreIntoStatistics(score);
-    await this.app.db.addFlashcardScore(score);
-    await this.app.db.addFlashcardStatistic(statistics);
+    await this.db.addFlashcardScore(score);
+    await this.db.addFlashcardStatistic(statistics);
 
     const promises = score.cards.map((card) =>
-      this.app.db.updateFlashcardProgress(
+      this.db.updateFlashcardProgress(
         card.id,
         new Date(card.time),
         card.progress

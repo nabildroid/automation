@@ -1,4 +1,4 @@
-import Flashcard from "../core/entities/flashcard";
+import Flashcard from "./flashcard";
 
 export default interface NotionFlashcard extends Flashcard {
   id: string;

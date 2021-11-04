@@ -1,8 +1,5 @@
-import Flashcard, {
-  FlashcardProgress,
-  FlashcardSpecial,
-} from "../core/entities/flashcard";
-import { FlashcardStatistics } from "../core/entities/flashcard_score";
+import Flashcard, { FlashcardProgress, FlashcardSpecial } from "./flashcard";
+import { FlashcardStatistics } from "./flashcard_score";
 
 export default interface StoredFlashcard extends Flashcard {
   id: string;

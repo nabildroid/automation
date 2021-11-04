@@ -1,13 +1,11 @@
-import IRoute from "../core/types/iroute";
-
 import { Request, Response } from "express";
-
-import IApp from "../core/contract/iapp";
+import { IRoute } from "../../../core/service";
+import Firestore from "../repositories/firestore";
 
 export default class syncOfflineFlashcards implements IRoute {
-  readonly app: IApp;
-  constructor(app: IApp) {
-    this.app = app;
+  db: Firestore;
+  constructor(db: Firestore) {
+    this.db = db;
   }
 
   async handler(req: Request, res: Response) {
@@ -34,11 +32,12 @@ export default class syncOfflineFlashcards implements IRoute {
     }[];
 
     for (const card of flashcards) {
-      await this.app.db.updateFlashcard(card);
+      // todo refactor this
+      await this.db.updateFlashcard(card as any);
     }
 
     for (const p of progress) {
-      await this.app.db.updateFlashcardProgress(
+      await this.db.updateFlashcardProgress(
         p.flashcardId,
         new Date(p.updated),
         p
@@ -46,7 +45,7 @@ export default class syncOfflineFlashcards implements IRoute {
     }
 
     for (const stat of stats) {
-      await this.app.db.addFlashcardStatistic({
+      await this.db.addFlashcardStatistic({
         ...stat,
         date: new Date(stat.updated),
       });

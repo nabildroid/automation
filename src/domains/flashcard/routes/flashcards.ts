@@ -1,13 +1,11 @@
-import IRoute from "../core/types/iroute";
-
 import { Request, Response } from "express";
-
-import IApp from "../core/contract/iapp";
+import { IRoute } from "../../../core/service";
+import Firestore from "../repositories/firestore";
 
 export default class Flashcards implements IRoute {
-  readonly app: IApp;
-  constructor(app: IApp) {
-    this.app = app;
+  readonly db: Firestore;
+  constructor(db: Firestore) {
+    this.db = db;
   }
 
   async handler(req: Request, res: Response) {
@@ -18,9 +16,9 @@ export default class Flashcards implements IRoute {
     const statistics_since = new Date(
       (req.query["statistics"] as string) || -1
     );
-    // const context_since = new Date(req.body.context);
+    const context_since = new Date(req.body.context);
 
-    const updates = await this.app.db.getFlashcardUpdates({
+    const updates = await this.db.getFlashcardUpdates({
       deleted_since,
       cards_since,
       progress_since,
