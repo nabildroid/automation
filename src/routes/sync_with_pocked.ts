@@ -24,13 +24,15 @@ export default class SyncWithPocket implements IRoute {
       for (const item of article.highlights) {
         if (!checked.highlighIds.includes(item.id)) {
           await new Promise((res) => setTimeout(res, 500));
-          await this.app.notion.addFlashcard({
-            term: article.title,
-            definition: item.text,
-            tags: article.tags,
-            from: "pocket",
-            source: article.url,
-          });
+          // BUG add events this route belongs to pocket
+          // but also needs a way to communicate with flashcard
+          // await this.app.notion.addFlashcard({
+          //   term: article.title,
+          //   definition: item.text,
+          //   tags: article.tags,
+          //   from: "pocket",
+          //   source: article.url,
+          // });
 
           newHighlightIds.push(item.id);
         }
