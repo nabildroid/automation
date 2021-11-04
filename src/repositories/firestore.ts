@@ -1,31 +1,13 @@
 import { firestore } from "firebase-admin";
-import {
-  FlashcardProgress,
-  FlashcardSpecial,
-} from "../core/entities/flashcard";
-import flashcard_score, {
-  FlashcardStatistics,
-} from "../core/entities/flashcard_score";
 import PocketCheck from "../core/entities/pocket_check";
 import task from "../core/entities/task";
 import {
   anyDateToFirestore,
   anyFirestoreToDate,
-  mergeFlashcardStatistics,
 } from "../core/utils";
-import AppConfig from "../entities/app_config";
-import NotionFlashcard from "../entities/notion_flashcard";
 import pocket_article from "../entities/pocket_article";
-import StoredFlashcard, {
-  StoredFlashcardProgress,
-  StoredFlashcardSpecial,
-  StoredFlashcardStatistics,
-} from "../entities/storedFlashcard";
 import syncedInboxes from "../entities/syncedInboxes";
-import IFirestore, {
-  FlashcardUpdates,
-  getFlashcardsParams,
-} from "./contracts/iFirestore";
+import IFirestore from "./contracts/iFirestore";
 
 const CONFIG = "/general/config";
 const TASKS = "/tasks";
@@ -33,11 +15,6 @@ const SYNCEDINBOXES = "/synced_inboxes";
 const BLOG = "/blog/last_update";
 const MODE = "/mode/";
 
-const FLASHCARD = "/flashcards/";
-const FLASHCARD_SCORE = "/flashcard_score";
-const FLASHCARD_PROGRESS = "/flashcard_progress";
-const FLASHCARD_SPECIAL = "/flashcard_special";
-const FLASHCARD_STATISTICS = "/flashcard_statistics";
 
 const POCKET = "/general/pocket";
 const POCKET_ARTICLES = "/pocket_articles";
@@ -95,166 +72,6 @@ export default class Firestore implements IFirestore {
     });
   }
 
-  async getFlashcards(): Promise<StoredFlashcard[]> {
-    const flashcards = await this.client.collection(FLASHCARD).get();
-
-    const list = flashcards.docs
-      .map<any>((d) => ({ ...d.data(), id: d.id }))
-      .map(anyFirestoreToDate);
-
-    return list as StoredFlashcard[];
-  }
-
-  async getFlashcardsScores(): Promise<flashcard_score[]> {
-    const query = await this.client.collection(FLASHCARD_SCORE).get();
-    return query.docs.map((doc) => {
-      const data = doc.data();
-      return anyFirestoreToDate(data);
-    });
-  }
-
-  async updateSpecialFlashcard(
-    id: string,
-    content: FlashcardSpecial,
-    date: Date
-  ): Promise<void> {
-    await this.client
-      .collection(FLASHCARD_SPECIAL)
-      .doc(id)
-      .set(anyDateToFirestore({ ...content, updated: date }));
-  }
-
-  async addFlashcardStatistic(statistics: FlashcardStatistics) {
-    await this.client
-      .collection(FLASHCARD_STATISTICS)
-      .add(anyDateToFirestore({ ...statistics, updated: statistics.date }));
-  }
-  async addFlashcardScore(score: flashcard_score): Promise<void> {
-    await this.client
-      .collection(FLASHCARD_SCORE)
-      .add(anyDateToFirestore(score));
-  }
-
-  async getFlashcardUpdates(
-    since: getFlashcardsParams
-  ): Promise<FlashcardUpdates> {
-    const queryCards = await this.client
-      .collection(FLASHCARD)
-      .where("updated", ">", firestore.Timestamp.fromDate(since.cards_since))
-      .get();
-
-    const queryProgress = await this.client
-      .collection(FLASHCARD_PROGRESS)
-      .where("updated", ">", firestore.Timestamp.fromDate(since.progress_since))
-      .get();
-
-    const queryStatistics = await this.client
-      .collection(FLASHCARD_STATISTICS)
-      .where(
-        "updated",
-        ">",
-        firestore.Timestamp.fromDate(since.statistics_since)
-      )
-      .get();
-
-    const querySpecial = await this.client
-      .collection(FLASHCARD_SPECIAL)
-      .where("updated", ">", firestore.Timestamp.fromDate(since.special_since))
-      .get();
-
-    return {
-      cards: queryCards.docs.map((doc) => {
-        const data = anyFirestoreToDate(doc.data());
-        return {
-          ...data,
-          id: doc.id,
-        } as StoredFlashcard;
-      }),
-      progress: queryProgress.docs.map((doc) => {
-        const data = anyFirestoreToDate(doc.data());
-        return {
-          ...data,
-          flashcardId: doc.id,
-        } as StoredFlashcardProgress;
-      }),
-      special: querySpecial.docs.map((doc) => {
-        const data = anyFirestoreToDate(doc.data());
-        return {
-          ...data,
-          flashcardId: doc.id,
-        } as StoredFlashcardSpecial;
-      }),
-      statistics: queryStatistics.docs.map((doc) => {
-        const data = anyFirestoreToDate(doc.data());
-        return {
-          ...data,
-        } as StoredFlashcardStatistics;
-      }),
-      delete: [],
-    };
-  }
-
-  async updateFlashcardProgress(
-    id: string,
-    date: Date,
-    progress: FlashcardProgress
-  ): Promise<void> {
-    await this.client
-      .collection(FLASHCARD_PROGRESS)
-      .doc(id)
-      .set(
-        anyDateToFirestore({
-          ...progress,
-          updated: date,
-        })
-      );
-  }
-
-  async updateFlashcard(flashcard: NotionFlashcard): Promise<void> {
-    console.log(flashcard);
-    const query = await this.client
-      .collection(FLASHCARD)
-      .where("notionId", "==", flashcard.id)
-      .limit(1)
-      .get();
-
-    if (query.size > 0) {
-      const [doc] = query.docs;
-      doc.ref.update(
-        anyDateToFirestore({
-          term: flashcard.term,
-          tags: flashcard.tags,
-          definition: flashcard.definition,
-          updated: flashcard.edited,
-        })
-      );
-    }
-  }
-
-  async addFlashcard(flashcard: NotionFlashcard): Promise<void> {
-    const newCard: Omit<StoredFlashcard, "id"> = {
-      created: flashcard.created,
-      definition: flashcard.definition,
-      tags: flashcard.tags,
-      updated: flashcard.edited,
-      notionId: flashcard.id,
-      term: flashcard.term,
-    };
-
-    const { id } = await this.client.collection(FLASHCARD).add(newCard);
-    // todo create a default progress outside this class
-    this.updateFlashcardProgress(id, newCard.updated, {
-      ease: 1.3,
-      interval: 1,
-      repetitions: 0,
-    });
-  }
-
-  async removeFlashcard(id: string): Promise<void> {
-    // save thid id somewhere, to sync all the cleints with the deleted cards
-    await this.client.collection(FLASHCARD).doc(id).delete();
-  }
-
   async reportMode(mode: string): Promise<void> {
     await this.client.collection(MODE).add({
       at: firestore.Timestamp.now(),
@@ -283,11 +100,7 @@ export default class Firestore implements IFirestore {
   async addSyncedInboxes(syncedInboxes: syncedInboxes): Promise<void> {
     await this.client.collection(SYNCEDINBOXES).add(syncedInboxes);
   }
-  async updateTicktickAuth(auth: string): Promise<void> {
-    await this.client.doc(CONFIG).update({
-      "auth.ticktick": auth,
-    });
-  }
+
 
   async getCompletedTasks(after?: Date) {
     let ref = this.client.collection(TASKS).where("done", "==", true);
@@ -300,17 +113,7 @@ export default class Firestore implements IFirestore {
     return query.docs.map((d) => d.data()) as (task & { done: true })[];
   }
 
-  async appConfig(): Promise<AppConfig> {
-    const doc = await this.client.doc(CONFIG).get();
-    const config = doc.data();
-    if (config) {
-      return this.validateConfig(config);
-    } else {
-      throw Error(
-        `application configuration doesn't exists in the provided database, path(${CONFIG}) is empty`
-      );
-    }
-  }
+
 
   getTasks(): Promise<task[]> {
     throw new Error("Method not implemented.");
@@ -343,14 +146,5 @@ export default class Firestore implements IFirestore {
     if (query.size) {
       return query.docs[0];
     }
-  }
-
-  private validateConfig(config: any): AppConfig {
-    // todo validate and create a default configuration
-    if (!(config as AppConfig).ticktickConfig.password) {
-      config.ticktickConfig.password = process.env.TICKTICK_DEFAULT_PASSWORD;
-    }
-
-    return config;
   }
 }

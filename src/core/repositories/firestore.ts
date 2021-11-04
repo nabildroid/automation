@@ -21,6 +21,12 @@ export default class Firestore {
     }
   }
 
+  async updateTicktickAuth(auth: string): Promise<void> {
+    await this.client.doc(CONFIG).update({
+      "auth.ticktick": auth,
+    });
+  }
+
   private validateConfig(config: any): AppConfig {
     // todo validate and create a default configuration
     if (!(config as AppConfig).ticktickConfig.password) {
@@ -29,4 +35,6 @@ export default class Firestore {
 
     return config;
   }
+
+  
 }

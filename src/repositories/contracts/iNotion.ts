@@ -1,6 +1,4 @@
-import Flashcard from "../../core/entities/flashcard";
 import NotionBlog, { NotionBlogContent } from "../../entities/notion_blog";
-import NotionFlashcard from "../../entities/notion_flashcard";
 import NotionInbox from "../../entities/notion_inbox";
 import NotionJournal from "../../entities/notion_journal";
 import TicktickTask from "../../entities/ticktick_task";
@@ -13,6 +11,4 @@ export default interface INotion {
   listBlog(): Promise<NotionBlog[]>;
   getBlogContent(blog: NotionBlog): Promise<NotionBlogContent>;
 
-  addFlashcard(flashcard: Flashcard): Promise<void>;
-  getFlashcards(): Promise<NotionFlashcard[]>;
 }

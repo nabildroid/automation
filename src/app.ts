@@ -3,11 +3,12 @@ import { Bucket } from "@google-cloud/storage";
 
 import IApp from "./core/contract/iapp";
 import IRoute from "./core/types/iroute";
-import AppConfig from "./entities/app_config";
+import AppConfig from "./core/entities/app_config";
 import IFirestore from "./repositories/contracts/iFirestore";
 import INotion from "./repositories/contracts/iNotion";
 import ITicktick from "./repositories/contracts/iTicktick";
 import Firestore from "./repositories/firestore";
+import TempFirestore from "./core/repositories/firestore";
 import Notion from "./repositories/notion";
 import Ticktick from "./repositories/ticktick";
 import CompletedTaskJournal from "./routes/completed_task_journal";
@@ -16,18 +17,13 @@ import IStorage from "./repositories/contracts/IStorage";
 import Storage from "./repositories/storage";
 import NewNotionInbox from "./routes/new_notion_inbox";
 import TicktickClient from "./services/ticktick";
-import { today } from "./core/utils";
 import SyncNotionTicktickInboxes from "./routes/sync_notion_ticktick_inboxes";
 import TicktickGeneralStatistics from "./routes/tickitck_general_statistics";
 import NotionBlog from "./routes/notion_blog";
 import ReportMode from "./routes/report_mode";
-import Flashcards from "./routes/flashcards";
-import SaveFlashcardsScore from "./routes/save_flashcards_score";
-import SyncFlashcards from "./routes/sync_flashcards";
-import UpdateSpecialFlashcard from "./routes/update_special_flashcard";
 import PocketClient from "./services/pocket";
 import SyncWithPocket from "./routes/sync_with_pocked";
-import syncOfflineFlashcards from "./routes/sync_offline_flashcards";
+import FlashcardService from "./domains/flashcard";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -40,6 +36,8 @@ export default class App implements IApp {
   private config!: AppConfig;
 
   constructor(server: Express) {
+    server.use("/flashcard", FlashcardService.route);
+
     this.configRoutes(server, [
       [
         "post",
@@ -51,14 +49,9 @@ export default class App implements IApp {
       ["post", "/newNotionInbox", new NewNotionInbox(this)],
       ["post", "/uploadScreenshot", new uploadScreenshot(this)],
       ["post", "/report", new ReportMode(this)],
-      ["post", "/flashcards", new SaveFlashcardsScore(this)],
-      ["post", "/updateSpecialFlashcard", new UpdateSpecialFlashcard(this)],
-      ["post", "/syncOfflineFlashcards", new syncOfflineFlashcards(this)],
 
       ["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
       ["get", "/techBlog", new NotionBlog(this)],
-      ["get", "/flashcards", new Flashcards(this)],
-      ["get", "/syncFlashcards", new SyncFlashcards(this)],
       ["get", "/syncWithPocket", new SyncWithPocket(this)],
     ]);
   }
@@ -76,7 +69,21 @@ export default class App implements IApp {
 
   async init(firestore: FirebaseFirestore.Firestore, bucket: Bucket) {
     this.db = new Firestore(firestore);
-    this.config = await this.db.appConfig();
+
+    // todo refacor this
+    const tempDB = new TempFirestore(firestore);
+    this.config = await tempDB.appConfig();
+
+    new FlashcardService({
+      firestore,
+      notion: {
+        auth: this.config.auth.notion,
+        databases: {
+          flashcard: this.config.notionConfig.flashcard,
+        },
+      },
+    });
+
     this.notion = new Notion(this.config.auth.notion, this.config.notionConfig);
     this.storage = new Storage(bucket);
     this.pocket = new PocketClient(this.config.auth.pocket);
@@ -84,7 +91,7 @@ export default class App implements IApp {
     const ticktickClient = new TicktickClient(
       this.config.ticktickConfig.email,
       this.config.ticktickConfig.password,
-      this.db.updateTicktickAuth.bind(this.db),
+      tempDB.updateTicktickAuth.bind(this.db),
       {
         auth: this.config.auth.ticktick,
       }
