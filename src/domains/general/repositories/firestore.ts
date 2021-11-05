@@ -1,12 +1,10 @@
 import { firestore } from "firebase-admin";
-import PocketCheck from "../core/entities/pocket_check";
-import task from "../core/entities/task";
+import PocketCheck from "../../../core/entities/pocket_check";
 import {
   anyDateToFirestore,
   anyFirestoreToDate,
-} from "../core/utils";
-import pocket_article from "../entities/pocket_article";
-import IFirestore from "./contracts/iFirestore";
+} from "../../../core/utils";
+import pocket_article from "../models/pocket_article";
 
 const BLOG = "/blog/last_update";
 const MODE = "/mode/";
@@ -15,7 +13,7 @@ const MODE = "/mode/";
 const POCKET = "/general/pocket";
 const POCKET_ARTICLES = "/pocket_articles";
 
-export default class Firestore implements IFirestore {
+export default class Firestore  {
   private readonly client: firestore.Firestore;
   constructor(client: firestore.Firestore) {
     this.client = client;

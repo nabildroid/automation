@@ -1,4 +1,4 @@
-import Task from "../../../core/entities/task";
+import Task from "./task";
 
 export default interface TicktickTask extends Task {
 	source: "ticktick";

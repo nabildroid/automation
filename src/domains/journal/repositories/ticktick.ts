@@ -1,5 +1,5 @@
 import TicktickClient from "../../../services/ticktick";
-import ticktick_task from "../../inbox/models/ticktick_task";
+import ticktick_task from "../../../core/entities/ticktick_task";
 
 export default class Ticktick {
   private readonly client: TicktickClient;

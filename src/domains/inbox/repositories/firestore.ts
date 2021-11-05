@@ -1,7 +1,5 @@
 import { firestore } from "firebase-admin";
-// todo is it realy a core thing !
 import task from "../../../core/entities/task";
-import { anyDateToFirestore, anyFirestoreToDate } from "../../../core/utils";
 import syncedInboxes from "../models/syncedInboxes";
 const TASKS = "/tasks";
 const SYNCEDINBOXES = "/synced_inboxes";

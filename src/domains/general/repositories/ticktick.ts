@@ -1,8 +1,7 @@
-import TicktickGeneralStats from "../entities/ticktick_general_stats";
-import TicktickClient from "../services/ticktick";
-import ITicktick from "./contracts/iTicktick";
+import TicktickGeneralStats from "../models/ticktick_general_stats";
+import TicktickClient from "../../../services/ticktick";
 
-export default class Ticktick implements ITicktick {
+export default class Ticktick  {
 	private readonly client: TicktickClient;
 
 	constructor(client: TicktickClient) {

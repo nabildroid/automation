@@ -2,17 +2,17 @@ import { Request, Response } from "express";
 import Task from "../../../core/entities/task";
 import { IRoute } from "../../../core/service";
 import NotionInbox from "../models/notion_inbox";
-import TicktickTask from "../models/ticktick_task";
 import syncedInboxes from "../models/syncedInboxes";
 import Notion from "../repositories/notion";
 import Ticktick from "../repositories/ticktick";
 import Firestore from "../repositories/firestore";
+import TicktickTask from "../../../core/entities/ticktick_task";
 
 export default class SyncNotionTicktickInboxes implements IRoute {
   notion: Notion;
   ticktick: Ticktick;
   db:Firestore;
-  
+
   constructor(db:Firestore,notion: Notion, ticktick: Ticktick) {
     this.db = db;
     this.notion = notion;

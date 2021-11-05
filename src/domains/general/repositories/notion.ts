@@ -1,19 +1,15 @@
-import INotion from "./contracts/iNotion";
-import { Client } from "@notionhq/client";
-import { NotionConfig } from "../core/entities/app_config";
-import NotionBlog, { NotionBlogContent } from "../entities/notion_blog";
-import NotionCore from "../core/repositories/notion_core";
+import NotionCore from "../../../core/repositories/notion_core";
+import NotionBlog, { NotionBlogContent } from "../models/notion_blog";
 
-export default class Notion implements INotion {
-  private readonly client: Client;
-  private readonly config: NotionConfig;
-  constructor(auth: string, config: NotionConfig) {
-    this.client = new Client({
-      auth,
-    });
-    this.config = config;
+
+export type Config = {
+  blog: string;
+};
+
+export default class Notion extends NotionCore<Config> {
+  constructor(auth: string, config: Config) {
+    super(auth, config);
   }
-
 
   async listBlog(): Promise<NotionBlog[]> {
     const blogs = await this.client.databases.query({
@@ -40,9 +36,4 @@ export default class Notion implements INotion {
 
     return NotionCore.childrenToMarkdown(children.results);
   }
-
-  
-
-
-  
 }

@@ -1,6 +1,6 @@
 import { Block } from "@notionhq/client/build/src/api-types";
+import TicktickTask from "../../../core/entities/ticktick_task";
 import NotionCore from "../../../core/repositories/notion_core";
-import TicktickTask from "../../inbox/models/ticktick_task";
 import notion_journal from "../models/notion_journal";
 
 export type Config = {
