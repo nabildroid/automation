@@ -4,7 +4,7 @@ import { promisify } from "util";
 import Axios from "axios";
 const finished = promisify(stream.finished);
 import fs from "fs";
-import { FlashcardStatistics } from "./entities/flashcard_score";
+import { FlashcardStatistics } from "../domains/flashcard/models/flashcard_score";
 
 export const setTodayUTCHour = (hour: number) => {
   const today = new Date();

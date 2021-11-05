@@ -2,7 +2,7 @@ const crypto = require("crypto");
 const qs = require("qs");
 
 import axios, { AxiosInstance } from "axios";
-import PocketArticle from "../entities/pocket_article";
+import PocketArticle from "../domains/general/models/pocket_article";
 
 export default class PocketClient {
   private client!: AxiosInstance;
