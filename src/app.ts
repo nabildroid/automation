@@ -11,19 +11,17 @@ import Firestore from "./repositories/firestore";
 import TempFirestore from "./core/repositories/firestore";
 import Notion from "./repositories/notion";
 import Ticktick from "./repositories/ticktick";
-import CompletedTaskJournal from "./routes/completed_task_journal";
-import uploadScreenshot from "./routes/upload_screenshot";
 import IStorage from "./repositories/contracts/IStorage";
 import Storage from "./repositories/storage";
-import NewNotionInbox from "./routes/new_notion_inbox";
 import TicktickClient from "./services/ticktick";
-import SyncNotionTicktickInboxes from "./routes/sync_notion_ticktick_inboxes";
 import TicktickGeneralStatistics from "./routes/tickitck_general_statistics";
 import NotionBlog from "./routes/notion_blog";
 import ReportMode from "./routes/report_mode";
 import PocketClient from "./services/pocket";
 import SyncWithPocket from "./routes/sync_with_pocked";
 import FlashcardService from "./domains/flashcard";
+import InboxService from "./domains/inbox";
+import JournalService from "./domains/journal";
 
 type RouteConfig = [method: "get" | "post", path: string, route: IRoute];
 
@@ -37,17 +35,10 @@ export default class App implements IApp {
 
   constructor(server: Express) {
     server.use("/flashcard", FlashcardService.route);
+    server.use("/inbox", InboxService.route);
+    server.use("/journal", JournalService.route);
 
     this.configRoutes(server, [
-      [
-        "post",
-        "/syncNotionTicktickInboxes",
-        new SyncNotionTicktickInboxes(this),
-      ],
-
-      ["post", "/completedtaskjournal", new CompletedTaskJournal(this)],
-      ["post", "/newNotionInbox", new NewNotionInbox(this)],
-      ["post", "/uploadScreenshot", new uploadScreenshot(this)],
       ["post", "/report", new ReportMode(this)],
 
       ["get", "/ticktickstats", new TicktickGeneralStatistics(this)],
@@ -96,6 +87,28 @@ export default class App implements IApp {
         auth: this.config.auth.ticktick,
       }
     );
+
+    new InboxService({
+      bucket: bucket,
+      firestore: firestore,
+      ticktickClient: ticktickClient,
+      notion: {
+        auth: this.config.auth.notion,
+        databases: {
+          inbox: this.config.notionConfig.inbox,
+        },
+      },
+    });
+
+    new JournalService({
+      notion: {
+        auth: this.config.auth.notion,
+        databases: {
+          journal: this.config.notionConfig.journal,
+        },
+      },
+      ticktickClient: ticktickClient,
+    });
 
     this.ticktick = new Ticktick(ticktickClient);
 
