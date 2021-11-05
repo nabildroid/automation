@@ -1,14 +1,9 @@
 import PocketCheck from "../../core/entities/pocket_check";
 import Task from "../../core/entities/task";
 import PocketArticle from "../../entities/pocket_article";
-import SyncedInboxes from "../../entities/syncedInboxes";
+import SyncedInboxes from "../../domains/inbox/models/syncedInboxes";
 
 export default interface IFirestore {
-  getTasks(): Promise<Task[]>;
-  getCompletedTasks(after?: Date): Promise<(Task & { done: true })[]>;
-  addTask(task: Task): Promise<void>;
-  addSyncedInboxes(syncedInboxes: SyncedInboxes): Promise<void>;
-
   updateRecentBlogDate(date: Date): Promise<void>;
   lastSeenBlogUpdate(): Promise<Date>;
 

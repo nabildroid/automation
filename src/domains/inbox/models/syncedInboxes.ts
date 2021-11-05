@@ -1,5 +1,5 @@
 import NotionInbox from "./notion_inbox";
-import TicktickTask from "./ticktick_task";
+import TicktickTask from "../models/ticktick_task";
 
 export default interface syncedInboxes {
 	notion: NotionInbox;

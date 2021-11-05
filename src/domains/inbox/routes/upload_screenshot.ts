@@ -1,15 +1,17 @@
-import IRoute from "../core/types/iroute";
-
 import { Request, Response } from "express";
-
-import IApp from "../core/contract/iapp";
-import { downloadFile } from "../core/utils";
+import { IRoute } from "../../../core/service";
+import { downloadFile } from "../../../core/utils";
+import Notion from "../repositories/notion";
+import Storage from "../repositories/storage";
 
 export default class uploadScreenshot implements IRoute {
-	readonly app: IApp;
-	constructor(app: IApp) {
-		this.app = app;
-	}
+	notion:Notion;
+	storage:Storage;
+	
+	constructor(notion:Notion,storage:Storage) {
+		this.notion = notion;
+		this.storage = storage;
+	}	
 
 	async handler(req: Request, res: Response) {
 		// todo add check the url
@@ -18,11 +20,11 @@ export default class uploadScreenshot implements IRoute {
 		
 		const tempFileName = "temp-screenshot" + Math.random();
 		const removeLocalFile = await downloadFile(url,tempFileName);
-		const publicUrl = await this.app.storage.addScreenshot(tempFileName);
+		const publicUrl = await this.storage.addScreenshot(tempFileName);
 
 		removeLocalFile();
 
-		const { id } = await this.app.notion.addScreenshotToInbox(publicUrl);
+		const { id } = await this.notion.addScreenshotToInbox(publicUrl);
 
 		res.send(
 			`screenshot ${publicUrl} has been saved in notion inbox at https://notion.so/${id}`
