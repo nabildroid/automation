@@ -1,4 +1,5 @@
 import { InputPropertyValueMap } from "@notionhq/client/build/src/api-endpoints";
+import { Page } from "@notionhq/client/build/src/api-types";
 import NotionCore from "../../../core/repositories/notion_core";
 import Flashcard from "../models/flashcard";
 import NotionFlashcard from "../models/notion_flashcard";
@@ -71,20 +72,26 @@ export default class Notion extends NotionCore<Config> {
   }
 
   async getFlashcards(): Promise<NotionFlashcard[]> {
-    const flashcards = await this.client.databases.query({
-      database_id: this.config.flashcard,
-    });
+    const flashcards: Page[] = [];
+    let cursor: any = undefined;
+    while (true) {
+      const query = await this.client.databases.query({
+        database_id: this.config.flashcard,
+        start_cursor: cursor,
+      });
+      cursor = query.next_cursor;
+      flashcards.push(...query.results);
 
-    const list = flashcards.results.map<NotionFlashcard>((page) => ({
+      if (!query.has_more) break;
+    }
+
+    const list = flashcards.map<NotionFlashcard>((page) => ({
       id: page.id,
       edited: new Date(page.last_edited_time),
       created: new Date(page.created_time),
-      definition: NotionCore.extractProperty<string>(
-        "definition",
-        page.properties
-      ),
-      term: NotionCore.extractProperty<string>("term", page.properties),
-      tags: NotionCore.extractProperty<string[]>("tags", page.properties),
+      definition: Notion.extractProperty<string>("definition", page.properties),
+      term: Notion.extractProperty<string>("term", page.properties),
+      tags: Notion.extractProperty<string[]>("tags", page.properties),
       published:
         Notion.extractProperty<string>("status", page.properties) ==
         "published",
