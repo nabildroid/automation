@@ -6,6 +6,8 @@ import Service from "../../core/service";
 import SaveFlashcardsScore from "./routes/save_flashcards_score";
 import SyncFlashcards from "./routes/sync_flashcards";
 import syncOfflineFlashcards from "./routes/sync_offline_flashcards";
+import { bus } from "../..";
+import Flashcard from "./models/flashcard";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
@@ -23,6 +25,7 @@ export default class FlashcardService extends Service {
     this.db = new Firestore(config.firestore);
 
     this.initRoutes();
+    this.initEvents();
   }
 
   initRoutes() {
@@ -37,4 +40,23 @@ export default class FlashcardService extends Service {
       route
     );
   }
+
+  initEvents() {
+    bus.addListener("notion.addFlashcard", async (payload) => {
+      await this.notion.addFlashcard(payload);
+    });
+  }
+
+  static emit<T extends FlashcardEvents>(
+    type: T,
+    payload: FlashcardEventPayloads[T]
+  ) {
+    bus.emit(type, payload);
+  }
 }
+
+type FlashcardEvents = "notion.addFlashcard";
+
+type FlashcardEventPayloads = {
+  ["notion.addFlashcard"]: Flashcard;
+};

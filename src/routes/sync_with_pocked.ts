@@ -3,6 +3,7 @@ import IRoute from "../core/types/iroute";
 import { Request, Response } from "express";
 
 import IApp from "../core/contract/iapp";
+import FlashcardService from "../domains/flashcard";
 
 export default class SyncWithPocket implements IRoute {
   readonly app: IApp;
@@ -23,16 +24,14 @@ export default class SyncWithPocket implements IRoute {
     const promises = articles.map(async (article) => {
       for (const item of article.highlights) {
         if (!checked.highlighIds.includes(item.id)) {
-          await new Promise((res) => setTimeout(res, 500));
-          // BUG add events this route belongs to pocket
-          // but also needs a way to communicate with flashcard
-          // await this.app.notion.addFlashcard({
-          //   term: article.title,
-          //   definition: item.text,
-          //   tags: article.tags,
-          //   from: "pocket",
-          //   source: article.url,
-          // });
+
+          FlashcardService.emit("notion.addFlashcard", {
+            term: article.title,
+            definition: item.text,
+            tags: article.tags,
+            from: "pocket",
+            source: article.url,
+          });
 
           newHighlightIds.push(item.id);
         }
