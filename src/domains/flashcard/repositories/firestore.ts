@@ -39,7 +39,6 @@ export default class Firestore {
   constructor(client: firestore.Firestore) {
     this.client = client;
   }
-
   async getFlashcards(): Promise<StoredFlashcard[]> {
     const flashcards = await this.client.collection(FLASHCARD).get();
 
@@ -108,13 +107,16 @@ export default class Firestore {
       .get();
 
     return {
-      cards: queryCards.docs.map((doc) => {
-        const data = anyFirestoreToDate(doc.data());
-        return {
-          ...data,
-          id: doc.id,
-        } as StoredFlashcard;
-      }),
+      cards: queryCards.docs
+        .map((doc) => {
+          const data = anyFirestoreToDate(doc.data());
+          return {
+            ...data,
+            id: doc.id,
+          } as StoredFlashcard;
+        })
+        .filter((c) => c.published),
+
       progress: queryProgress.docs.map((doc) => {
         const data = anyFirestoreToDate(doc.data());
         return {
@@ -135,7 +137,16 @@ export default class Firestore {
           ...data,
         } as StoredFlashcardStatistics;
       }),
-      delete: [],
+      delete: queryCards.docs
+        .map((doc) => {
+          const data = anyFirestoreToDate(doc.data());
+          return {
+            ...data,
+            id: doc.id,
+          } as StoredFlashcard;
+        })
+        .filter((c) => !c.published)
+        .map((c) => c.id),
     };
   }
 
@@ -171,6 +182,7 @@ export default class Firestore {
           tags: flashcard.tags,
           definition: flashcard.definition,
           updated: flashcard.edited,
+          published: flashcard.published,
         })
       );
     }
@@ -184,6 +196,7 @@ export default class Firestore {
       updated: flashcard.edited,
       notionId: flashcard.id,
       term: flashcard.term,
+      published: flashcard.published,
     };
 
     const { id } = await this.client.collection(FLASHCARD).add(newCard);

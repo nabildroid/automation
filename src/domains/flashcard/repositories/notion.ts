@@ -85,6 +85,9 @@ export default class Notion extends NotionCore<Config> {
       ),
       term: NotionCore.extractProperty<string>("term", page.properties),
       tags: NotionCore.extractProperty<string[]>("tags", page.properties),
+      published:
+        Notion.extractProperty<string>("status", page.properties) ==
+        "published",
     }));
 
     return list;

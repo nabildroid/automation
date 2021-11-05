@@ -6,6 +6,7 @@ export default interface StoredFlashcard extends Flashcard {
   notionId: string;
   created: Date;
   updated: Date;
+  published:boolean;
 }
 
 export interface StoredFlashcardProgress extends FlashcardProgress {
