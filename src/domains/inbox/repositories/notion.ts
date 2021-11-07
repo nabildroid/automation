@@ -1,5 +1,6 @@
 import { InputPropertyValueMap } from "@notionhq/client/build/src/api-endpoints";
 import { Block } from "@notionhq/client/build/src/api-types";
+import { TaskContent } from "../../../core/entities/task";
 import NotionCore from "../../../core/repositories/notion_core";
 import NotionInbox from "../models/notion_inbox";
 

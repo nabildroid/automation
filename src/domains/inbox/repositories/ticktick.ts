@@ -1,5 +1,6 @@
 import TicktickClient from "../../../services/ticktick";
 import ticktick_task from "../../../core/entities/ticktick_task";
+import { TaskContent } from "../../../core/entities/task";
 
 export default class Ticktick {
 	private readonly client: TicktickClient;
@@ -8,8 +9,7 @@ export default class Ticktick {
 		this.client = client;
 	}
 
-	addToInbox(title: string, body?: string): Promise<ticktick_task> {
-		throw new Error("Method not implemented.");
+  async addToInbox(content: TaskContent): Promise<ticktick_task> {
 	}
     
 	async getTask(

@@ -1,5 +1,5 @@
-import { NotionRow } from "../../../core/entities/notion_row";
+import { TaskContent, TaskReference } from "../../../core/entities/task";
 
-export default interface NotionInbox extends NotionRow {
-	title: string;
+export default interface NotionInbox extends TaskContent, TaskReference {
+  source: "notion";
 }

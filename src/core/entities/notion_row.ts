@@ -1,5 +1,5 @@
-import Task from "./task";
+import  { TaskReference } from "./task";
 
-export interface NotionRow extends Task {
+export interface NotionRow extends TaskReference {
 	source: "notion";
 }
