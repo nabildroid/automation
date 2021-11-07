@@ -1,47 +1,112 @@
 import { Request, Response } from "express";
-import Task from "../../../core/entities/task";
 import { IRoute } from "../../../core/service";
-import NotionInbox from "../models/notion_inbox";
-import syncedInboxes from "../models/syncedInboxes";
+import syncedInboxes, { SyncState } from "../models/syncedInboxes";
 import Notion from "../repositories/notion";
 import Ticktick from "../repositories/ticktick";
 import Firestore from "../repositories/firestore";
-import TicktickTask from "../../../core/entities/ticktick_task";
+import { arrayEquals } from "../../../core/utils";
 
 export default class SyncNotionTicktickInboxes implements IRoute {
   notion: Notion;
   ticktick: Ticktick;
-  db:Firestore;
+  db: Firestore;
 
-  constructor(db:Firestore,notion: Notion, ticktick: Ticktick) {
+  constructor(db: Firestore, notion: Notion, ticktick: Ticktick) {
     this.db = db;
     this.notion = notion;
     this.ticktick = ticktick;
   }
 
   async handler(req: Request, res: Response) {
-    const { id, parent, source } = req.body.task as Task;
-    let associatedTask: NotionInbox | TicktickTask;
-    let task: NotionInbox | TicktickTask;
+    const inboxes = await this.db.getSyncedInboxes();
 
-    if (source == "ticktick") {
-      task = (await this.ticktick.getTask(id, parent))!;
-      associatedTask = await this.notion.addToInbox(task.title);
-    } else {
-      task = (await this.notion.getInbox(id))!;
-      associatedTask = await this.ticktick.addToInbox(task.title);
+    for (const inbox of inboxes) {
+      const prev = inbox.synced;
+      const current = await this.getSyncedInboxesFromTheSources(prev);
+
+      const state = this.compare(prev, current);
+
+      await this.handleSyncState(
+        inbox.id,
+        state,
+        prev,
+        current as syncedInboxes
+      );
+    }
+  }
+
+  async handleSyncState(
+    id: string,
+    state: SyncState,
+    prev: syncedInboxes,
+    current: syncedInboxes
+  ) {
+    let isDone = false;
+    if (state == SyncState.synced) {
+      return;
+    } else if (state == SyncState.deleted) {
+      isDone = true;
+    } else if (state == SyncState.notionOff) {
+      await this.notion.updateInbox(current.notion.id, current.ticktick);
+    } else if (state == SyncState.ticktickOff) {
+      await this.ticktick.updateInbox(current.ticktick.id, current.notion);
+    } else if (state == SyncState.notionDone) {
+      await this.ticktick.updateInbox(current.ticktick.id, {
+        done: true,
+      });
+      isDone = true;
+    } else if (state == SyncState.tickticDone) {
+      await this.notion.updateInbox(current.notion.id, {
+        done: true,
+      });
+      isDone = true;
     }
 
-    const syncedInboxes: syncedInboxes = {
-      notion: task.source == "notion" ? task : (associatedTask as NotionInbox),
-      ticktick:
-        task.source == "ticktick" ? task : (associatedTask as TicktickTask),
-    };
+    await this.db.deleteSyncedInboxes(id);
+    if (!isDone) {
+      await this.db.addSyncedInboxes(current);
+    }
+  }
 
-    await this.db.addSyncedInboxes(syncedInboxes);
+  compare(prev: syncedInboxes, current: Partial<syncedInboxes>): SyncState {
+    if (!current.notion || !current.ticktick) {
+      return SyncState.deleted;
+    } else if (current.notion && current.ticktick) {
+      if (current.notion.title != current.ticktick.title) {
+        if (current.notion.title == prev.notion.title) {
+          return SyncState.notionOff;
+        } else return SyncState.ticktickOff;
+      }
 
-    res.send(
-      `${associatedTask.source} => inbox item ${associatedTask.id} has been created `
+      if (!arrayEquals(current.notion.tags, current.ticktick.tags)) {
+        if (arrayEquals(current.notion.tags, prev.notion.tags)) {
+          return SyncState.notionOff;
+        } else return SyncState.ticktickOff;
+      }
+
+      if (current.notion.done) {
+        return SyncState.notionDone;
+      }
+      if (current.ticktick.done) {
+        return SyncState.tickticDone;
+      }
+    }
+
+    return SyncState.synced;
+  }
+
+  async getSyncedInboxesFromTheSources(
+    prev: syncedInboxes
+  ): Promise<Partial<syncedInboxes>> {
+    const notion = await this.notion.getInbox(prev.notion.id);
+    const ticktick = await this.ticktick.getTask(
+      prev.ticktick.id,
+      prev.ticktick.parent
     );
+
+    return {
+      notion,
+      ticktick,
+    };
   }
 }

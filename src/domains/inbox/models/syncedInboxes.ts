@@ -7,6 +7,7 @@ export default interface syncedInboxes {
 }
 
 export enum SyncState {
+	deleted,
 	synced,
 	notionOff,
 	ticktickOff,
