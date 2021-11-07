@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import md5 from "md5";
 import { dateFormat } from "../core/utils";
 
 const BASEURL = "https://api.ticktick.com/api/v2";
@@ -112,7 +113,9 @@ export default class TicktickClient {
 
   createTasks(tasks: (OptionalTaskParameters & { title: string })[]) {
     return this.client.post(API.BATCH_TASKS, {
-      add: tasks.map(createTask),
+      add: tasks
+        .map(createTask)
+        .map((e) => ({ ...e, id: TicktickClient.randomTaskId() })),
       addAttachments: [],
       delete: [],
       deleteAttachments: [],
@@ -158,6 +161,10 @@ export default class TicktickClient {
       taskId,
       list,
     };
+  }
+
+  static randomTaskId() {
+    return md5((Date.now() + Math.random()).toString()).slice(0, 24);
   }
 }
 
