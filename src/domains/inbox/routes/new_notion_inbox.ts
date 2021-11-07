@@ -12,10 +12,15 @@ export default class NewNotionInbox implements IRoute {
     const note = (req.body.note as string).trim();
     const lines = note.split("\n");
     const title = lines.shift() as string;
-    const body = lines.length ? lines.join("\n") : undefined;
+    const body = lines.length ? lines.join("\n") : "";
     // todo add hashtags and MD5 to Notion childrens
 
-    const { id } = await this.notion.addToInbox(title, body);
+    const { id } = await this.notion.addToInbox({
+      tags: [],
+      body: body,
+      done: false,
+      title: title,
+    });
 
     res.send(
       `new note has been saved in your inbox at https://notion.so/${id}`
