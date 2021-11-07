@@ -14,6 +14,35 @@ export default class Firestore {
     await this.client.collection(SYNCEDINBOXES).add(syncedInboxes);
   }
 
+  async deleteSyncedInboxes(id: string): Promise<void> {
+    await this.client.collection(SYNCEDINBOXES).doc(id).delete();
+  }
+
+  async getSyncedInboxes() {
+    const query = await this.client.collection(SYNCEDINBOXES).get();
+    return query.docs.map((doc) => ({
+      id: doc.id,
+      synced: doc.data() as syncedInboxes,
+    }));
+  }
+
+  async getSyncedInbox(taskId: string) {
+    const sources = ["notion", "ticktick"];
+    const queries = sources.map((source) =>
+      this.client
+        .collection(SYNCEDINBOXES)
+        .where(`${source}.id`, "==", taskId)
+        .get()
+    );
+
+    const results = await Promise.all(queries);
+    const data = results
+      .filter((q) => !q.empty)
+      .map((q) => q.docs.map((d) => d.data()))
+      .flat();
+
+    return data[0] as syncedInboxes | undefined;
+  }
 
   async getCompletedTasks(after?: Date) {
     let ref = this.client.collection(TASKS).where("done", "==", true);
@@ -25,8 +54,6 @@ export default class Firestore {
 
     return query.docs.map((d) => d.data()) as (task & { done: true })[];
   }
-
-
 
   getTasks(): Promise<task[]> {
     throw new Error("Method not implemented.");

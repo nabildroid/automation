@@ -9,6 +9,7 @@ import Ticktick, { Config as TicktickConfig } from "./repositories/ticktick";
 import TicktickClient from "../../services/ticktick";
 import { Bucket } from "@google-cloud/storage";
 import Storage from "./repositories/storage";
+import NewInbox from "./routes/new_inbox";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
@@ -46,6 +47,7 @@ export default class InboxService extends Service {
     this.configRoutes(
       [
         ["post", "/notion", new NewNotionInbox(this.notion)],
+        ["post", "/", new NewInbox(this.db, this.notion, this.ticktick)],
         [
           "post",
           "/sync",
