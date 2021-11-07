@@ -57,10 +57,11 @@ export default class Ticktick {
   }
 
   async getTask(id: string, list: string): Promise<ticktick_task | undefined> {
+    try {
     const { data, status } = await this.client.getTask(id, list);
 
     if (status != 200) {
-      return undefined;
+        throw new Error("unable to get the task");
     } else {
       return {
         id: data.id,
@@ -70,6 +71,9 @@ export default class Ticktick {
         tags: data.tags || [],
         source: "ticktick",
       };
+      }
+    } catch (error) {
+      return undefined;
     }
   }
 }

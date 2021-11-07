@@ -18,6 +18,8 @@ export default class Notion extends NotionCore<Config> {
       page_id: id,
     });
 
+    if (page.archived) return;
+
     return {
       id: page.id,
       title: Notion.extractProperty<string>("title", page.properties),

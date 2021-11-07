@@ -33,6 +33,7 @@ export default class SyncNotionTicktickInboxes implements IRoute {
         current as syncedInboxes
       );
     }
+    res.send("done");
   }
 
   async handleSyncState(
@@ -45,6 +46,8 @@ export default class SyncNotionTicktickInboxes implements IRoute {
     if (state == SyncState.synced) {
       return;
     } else if (state == SyncState.deleted) {
+      if (current.notion) await this.notion.deleteInbox(prev.notion.id);
+      if (current.ticktick) await this.ticktick.deleteInbox(prev.ticktick.id);
       isDone = true;
     } else if (state == SyncState.notionOff) {
       await this.notion.updateInbox(current.notion.id, current.ticktick);
