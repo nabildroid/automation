@@ -56,4 +56,18 @@ export default class NotionCore<Config extends { [key: string]: string }> {
         throw Error("unsupported type");
     }
   }
+
+  static parseUrl(url: string) {
+    // todo check the url validity
+    const parts = url.match(/\w{10}\w+/g)!;
+    const page = parts.pop();
+    const database = parts.pop();
+
+    if (!page || !database) throw Error("Unvalide Notion Page Url");
+
+    return {
+      page,
+      database,
+    };
+  }
 }

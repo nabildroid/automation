@@ -69,7 +69,13 @@ export default class NewInbox implements IRoute {
           source: "ticktick",
         };
       } else if ((body.source as TaskReference["source"]) == "notion") {
-        // BUG implement this!
+        const { page, database } = NotionCore.parseUrl(body.url);
+
+        return {
+          id: page,
+          parent: database,
+          source: "notion",
+        };
       }
     }
     return body as TaskReference;
