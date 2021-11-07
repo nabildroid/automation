@@ -13,28 +13,94 @@ export default class Notion extends NotionCore<Config> {
     super(auth, config);
   }
 
-  getInbox(id: string): Promise<NotionInbox | undefined> {
-    throw new Error("Method not implemented.");
+  async getInbox(id: string): Promise<NotionInbox | undefined> {
+    const page = await this.client.pages.retrieve({
+      page_id: id,
+    });
+
+    return {
+      id: page.id,
+      title: Notion.extractProperty<string>("title", page.properties),
+      tags: Notion.extractProperty<string[]>("tags", page.properties),
+      done: Notion.extractProperty<boolean>("done", page.properties),
+      source: "notion",
+      parent: (page.parent as any).database_id,
+      body: "",
+    };
   }
-  async addToInbox(title: string, body?: string): Promise<NotionInbox> {
+
+  async updateInbox(id: string, content: Partial<TaskContent>) {
+    const properties: InputPropertyValueMap = {};
+    if (content.done) {
+      properties["done"] = {
+        type: "checkbox",
+        checkbox: content.done,
+      };
+    }
+    if (content.tags) {
+      properties["tags"] = {
+        type: "multi_select",
+        multi_select: content.tags.map((tag) => ({ name: tag })),
+      };
+    }
+
+    if (content.title) {
+      properties["title"] = {
+        type: "title",
+        title: [
+          {
+            type: "text",
+            text: {
+              content: content.title,
+            },
+          },
+        ],
+      };
+    }
+
+    await this.client.pages.update({
+      page_id: id,
+      properties,
+      archived: false,
+    });
+  }
+
+  async deleteInbox(id: string) {
+    await this.client.pages.update({
+      page_id: id,
+      archived: true,
+      properties: {},
+    });
+  }
+
+  async addToInbox(content: TaskContent): Promise<NotionInbox> {
+    const properties: InputPropertyValueMap = {};
+    properties["done"] = {
+      type: "checkbox",
+      checkbox: content.done,
+    };
+    properties["tags"] = {
+      type: "multi_select",
+      multi_select: content.tags.map((tag) => ({ name: tag })),
+    };
+    properties["title"] = {
+      type: "title",
+      title: [
+        {
+          type: "text",
+          text: {
+            content: content.title,
+          },
+        },
+      ],
+    };
+
     const { id, parent } = await this.client.pages.create({
       parent: {
         database_id: this.config.inbox,
       },
-      properties: {
-        title: {
-          type: "title",
-          title: [
-            {
-              type: "text",
-              text: {
-                content: title,
-              },
-            },
-          ],
-        },
-      },
-      children: body
+      properties: properties,
+      children: content.body
         ? ([
             {
               paragraph: {
@@ -42,7 +108,7 @@ export default class Notion extends NotionCore<Config> {
                   {
                     type: "text",
                     text: {
-                      content: body,
+                      content: content.body,
                     },
                   },
                 ],
@@ -57,7 +123,9 @@ export default class Notion extends NotionCore<Config> {
       id,
       parent: (parent as any).database_id,
       source: "notion",
-      title,
+      title: content.title,
+      tags: [],
+      body: "",
     };
   }
 
@@ -99,7 +167,7 @@ export default class Notion extends NotionCore<Config> {
               {
                 type: "text",
                 text: {
-                  content: "Screenshot taken from your phone",
+                  content: "Screenshot is taken from your phone",
                 },
               },
             ],
@@ -114,6 +182,8 @@ export default class Notion extends NotionCore<Config> {
       parent: (parent as any).database_id,
       source: "notion",
       title: `Screenshot ${new Date().toISOString()}`,
+      tags: [],
+      body: "",
     };
   }
 }

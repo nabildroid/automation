@@ -2,7 +2,6 @@ import { Express } from "express";
 import { Bucket } from "@google-cloud/storage";
 
 import AppConfig from "./core/entities/app_config";
-import TempFirestore from "./core/repositories/firestore";
 import TicktickClient from "./services/ticktick";
 import PocketClient from "./services/pocket";
 import FlashcardService from "./domains/flashcard";
@@ -50,7 +49,10 @@ export default class App {
     new InboxService({
       bucket: bucket,
       firestore: firestore,
-      ticktickClient: ticktickClient,
+      tickitck: {
+        ticktickClient: ticktickClient,
+        projects: this.config.ticktickConfig,
+      },
       notion: {
         auth: this.config.auth.notion,
         databases: {

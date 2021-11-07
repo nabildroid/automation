@@ -2,35 +2,74 @@ import TicktickClient from "../../../services/ticktick";
 import ticktick_task from "../../../core/entities/ticktick_task";
 import { TaskContent } from "../../../core/entities/task";
 
+export type Config = {
+  inbox: string;
+};
 export default class Ticktick {
-	private readonly client: TicktickClient;
+  private readonly client: TicktickClient;
+  readonly config: Config;
+  constructor(client: TicktickClient, config: Config) {
+    this.client = client;
+    this.config = config;
+  }
 
-	constructor(client: TicktickClient) {
-		this.client = client;
-	}
+  async updateInbox(id: string, content: Partial<TaskContent>) {
+    await this.client.updateTasks([
+      {
+        id,
+        project: this.config.inbox,
+        content: content?.body,
+        status: content?.done ? 2 : 0,
+        tags: content?.tags,
+        title: content?.title,
+      }
+    ]);
+  }
+
+  async deleteInbox(id: string) {
+    await this.client.deleteTasks([
+      {
+        taskId: id,
+        projectId: this.config.inbox,
+      },
+    ]);
+  }
 
   async addToInbox(content: TaskContent): Promise<ticktick_task> {
-	}
-    
-	async getTask(
-		id: string,
-		list: string
-	): Promise<ticktick_task | undefined> {
-		const { data, status } = await this.client.getTask(id, list);
+    const { data, status } = await this.client.createTasks([
+      {
+        title: content.title,
+        content: content.body,
+        tags: content.tags,
+        status: content.done ? 2 : 0,
+      },
+    ]);
 
-		if (status != 200) {
-			return undefined;
-		} else {
-			return {
-				id: data.id,
-				parent: data.projectId,
-				title: data.title,
-				done: data.status == 2,
-				tags: data.tags || [],
-				source: "ticktick",
-			};
-		}
-	}
+    const { id2etag } = data;
+    const id = Object.keys(id2etag)[0] as string;
 
-	
+    return {
+      ...content,
+      id,
+      parent: this.config.inbox,
+      source: "ticktick",
+    };
+  }
+
+  async getTask(id: string, list: string): Promise<ticktick_task | undefined> {
+    const { data, status } = await this.client.getTask(id, list);
+
+    if (status != 200) {
+      return undefined;
+    } else {
+      return {
+        id: data.id,
+        parent: data.projectId,
+        title: data.title,
+        done: data.status == 2,
+        tags: data.tags || [],
+        source: "ticktick",
+      };
+    }
+  }
 }
