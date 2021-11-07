@@ -8,6 +8,7 @@ import Ticktick from "../repositories/ticktick";
 import Firestore from "../repositories/firestore";
 import TicktickTask from "../../../core/entities/ticktick_task";
 import TicktickClient from "../../../services/ticktick";
+import NotionCore from "../../../core/repositories/notion_core";
 
 export default class NewInbox implements IRoute {
   notion: Notion;
@@ -23,10 +24,12 @@ export default class NewInbox implements IRoute {
   // this endpoint is been called anytime a task get updated
   async handler(req: Request, res: Response) {
     const reference = this.parseRequestBody(req.body);
-    console.log(reference);
-    
+
+    const exists = await this.db.getSyncedInbox(reference.id);
+    if (exists) return res.send("exists");
+
     const newSynced = await this.createAssociatedTask(reference);
-    await this.db.addSyncedInboxes(newSynced);
+    await this.db.addSyncedInboxes(this.normalizeNotionIds(newSynced));
 
     res.send("the new task has been dispatched");
   }
@@ -79,5 +82,12 @@ export default class NewInbox implements IRoute {
       }
     }
     return body as TaskReference;
+  }
+
+  normalizeNotionIds(inbox: syncedInboxes) {
+    inbox.notion.id = inbox.notion.id.replace(/-/g, "");
+    inbox.notion.parent = inbox.notion.parent.replace(/-/g, "");
+
+    return inbox;
   }
 }
