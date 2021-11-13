@@ -4,6 +4,7 @@ import Service from "../../core/service";
 import TicktickClient from "../../services/ticktick";
 import Ticktick from "./repositories/ticktick";
 import GeneralStatistics from "./routes/general_statistics";
+import Wallpaper from "./routes/wallpaper";
 import SaveRanking from "./routes/save_ranking";
 
 type ServiceConfig = {
@@ -35,6 +36,7 @@ export default class TicktickService extends Service {
           "/statistics/ranking",
           new SaveRanking(this.ticktick, this.db),
         ],
+        ["get", "/wallpaper", new Wallpaper(this.ticktick,this.db)],
       ],
       route
     );
