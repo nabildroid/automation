@@ -20,6 +20,7 @@ export default class App {
     server.use("/inbox", InboxService.route);
     server.use("/journal", JournalService.route);
     server.use("/general", GeneralService.route);
+    server.use("/ticktick", TicktickService.route);
   }
 
   async init(firestore: FirebaseFirestore.Firestore, bucket: Bucket) {
