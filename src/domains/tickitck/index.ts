@@ -3,6 +3,7 @@ import Firestore from "./repositories/firestore";
 import Service from "../../core/service";
 import TicktickClient from "../../services/ticktick";
 import Ticktick from "./repositories/ticktick";
+import GeneralStatistics from "./routes/general_statistics";
 
 type ServiceConfig = {
   firestore: FirebaseFirestore.Firestore;
@@ -25,6 +26,11 @@ export default class TicktickService extends Service {
 
   initRoutes() {
     const { route } = TicktickService;
-    this.configRoutes([], route);
+    this.configRoutes(
+      [
+        ["get", "/statistics/general", new GeneralStatistics(this.ticktick)],
+      ],
+      route
+    );
   }
 }
