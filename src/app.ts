@@ -78,7 +78,6 @@ export default class App {
           blog: this.config.notionConfig.blog,
         },
       },
-      ticktickClient: ticktickClient,
       firestore: firestore,
       pocketClient: pocketClient,
     });
