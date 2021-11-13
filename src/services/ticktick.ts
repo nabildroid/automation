@@ -2,15 +2,18 @@ import axios, { AxiosInstance } from "axios";
 import md5 from "md5";
 import { dateFormat } from "../core/utils";
 
-const BASEURL = "https://api.ticktick.com/api/v2";
+const BASEURL = "https://api.ticktick.com/api";
 
 enum API {
-  STATUS = "/user/status",
-  LOGIN = "/user/signin",
-  TASK_GET = "/task/",
-  TASK_COMPLEYED = "/project/all/completedInAll/",
-  STATISTICS_GENERAL = "/statistics/general",
-  BATCH_TASKS = "/batch/task",
+  STATUS = "/v2/user/status",
+  LOGIN = "/v2/user/signin",
+  TASK_GET = "/v2/task/",
+  TASK_COMPLEYED = "/v2/project/all/completedInAll/",
+  STATISTICS_GENERAL = "/v2/statistics/general",
+  BATCH_TASKS = "/v2/batch/task",
+  RANKING = "/v3/user/ranking",
+  HABITS = "v2/habits",
+  HABITS_CHECKIN = "/v2/habitCheckins/query",
 }
 
 export default class TicktickClient {
@@ -98,6 +101,10 @@ export default class TicktickClient {
     });
   }
 
+  getRanking() {
+    return this.client.get(API.RANKING);
+  }
+
   getGeneralStatistics() {
     return this.client.get(API.STATISTICS_GENERAL);
   }
@@ -108,6 +115,18 @@ export default class TicktickClient {
         from: dateFormat(after),
         to: "",
       },
+    });
+  }
+
+  getHabits() {
+    return this.client.get(API.HABITS);
+  }
+
+  getHabitsCheckin(after: Date, ids: string[]) {
+    console.log(dateToTicktickFormat(after));
+    return this.client.post(API.HABITS_CHECKIN, {
+      afterStamp: dateToTicktickFormat(after),
+      habitIds: ids,
     });
   }
 
@@ -226,4 +245,20 @@ function createTask(task: OptionalTaskParameters) {
     timeZone: "Africa/Algiers",
     title: task.title,
   };
+}
+
+// convert date to format like 20211113
+export function dateToTicktickFormat(date: Date) {
+  const [year, day, month] = date.toLocaleDateString().split("/").reverse();
+
+  return [year, month.padStart(2, "0"), day.padStart(2, "0")].join("");
+}
+
+/** convert from 20210908 to 2021 09 08 */
+export function tickitckToDateformat(str: string) {
+  const year = str.slice(0, 4);
+  const month = str.slice(4, 6);
+  const day = str.slice(6);
+
+  return new Date([year, month, day].join(" "));
 }
