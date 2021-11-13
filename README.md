@@ -8,8 +8,7 @@ personal Nodejs application for automating and linking several applications toge
   > ~~Notion doesn't yet support all the block types. for instance Quote is not supported~~
   > https://developers.notion.com/changelog/callouts-and-quote-blocks-are-now-supported
 - [ ]  Automate shortcut for uploading picture of the day
-- [ ]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
-  + [ ]  periodically check for out-of-sync problems
+
   
   
 - [ ] Ubuntu Pomodoro widget in the top bar connected with ticktick pomodoro & allows the option to select a focus task 
@@ -23,6 +22,8 @@ personal Nodejs application for automating and linking several applications toge
 
 ## Done
 
+- [x]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
+  + [x]  periodically check for out-of-sync problems
 
 - [X]  pocket finished Reads ⇒ firestore
 - [X] highlights to notion db
