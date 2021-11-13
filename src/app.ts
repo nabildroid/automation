@@ -9,6 +9,7 @@ import InboxService from "./domains/inbox";
 import JournalService from "./domains/journal";
 import Firestore from "./core/repositories/firestore";
 import GeneralService from "./domains/general";
+import TicktickService from "./domains/tickitck";
 
 export default class App {
   private config!: AppConfig;
@@ -81,6 +82,12 @@ export default class App {
       firestore: firestore,
       pocketClient: pocketClient,
     });
+
+    new TicktickService({
+      firestore: firestore,
+      ticktick: ticktickClient,
+    });
+
     console.log(`#${this.config.title} has been initiated`);
   }
 }
