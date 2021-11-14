@@ -67,6 +67,12 @@ export default class Wallpaper implements IRoute {
       }
     });
 
+    habits.forEach((h) => {
+      if (!sum[h.id]) {
+        sum[h.id] = [0];
+      }
+    });
+
     return sum;
   }
 
