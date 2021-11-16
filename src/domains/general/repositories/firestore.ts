@@ -25,7 +25,7 @@ export default class Firestore  {
     if (data) {
       return {
         checked: data.checked.toDate(),
-        highlighIds: data.highlighIds,
+        highlighIds: data.highlighIds ?? [],
       };
     } else
       return {
