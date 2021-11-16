@@ -25,7 +25,7 @@ export default class Wallpaper implements IRoute {
       this.getWeekStartDay(),
       habits.map((h) => h.id)
     );
-
+    
     let sum = this.computeHabitSumValueGoalRatio(habitCheckins);
     sum = this.appendMissingDaysToHabitCheckIns(sum, habits);
 
@@ -36,8 +36,8 @@ export default class Wallpaper implements IRoute {
     const result = {
       weeks: scores.map(v=>v.toFixed(4)),
       habits: averange.map(v=>v.toFixed(4)),
-      productivity: Math.floor(ranks.pop()?.ranking || 0),
       start: ranks[0]?.date || null,
+      productivity: Math.floor(ranks.pop()?.ranking || 0),
     };
 
     res.send(JSON.stringify(result));
@@ -78,7 +78,7 @@ export default class Wallpaper implements IRoute {
 
   getWeekStartDay() {
     const now = new Date();
-    return new Date(now.setDate(now.getDate() - now.getDay()));
+    return new Date(now.setDate(now.getDate() - now.getDay() - 5  ));
   }
 
   computeWeeksScore(weeks: Ranking[][]) {
