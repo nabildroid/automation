@@ -5,6 +5,7 @@ import Notion from "../repositories/notion";
 import Ticktick from "../repositories/ticktick";
 import Firestore from "../repositories/firestore";
 import { arrayEquals } from "../../../core/utils";
+import NotionCore from "../../../core/repositories/notion_core";
 
 export default class SyncNotionTicktickInboxes implements IRoute {
   notion: Notion;
@@ -50,9 +51,15 @@ export default class SyncNotionTicktickInboxes implements IRoute {
       if (current.ticktick) await this.ticktick.deleteInbox(prev.ticktick.id);
       isDone = true;
     } else if (state == SyncState.notionOff) {
-      await this.notion.updateInbox(current.notion.id, current.ticktick);
+      await this.notion.updateInbox(current.notion.id, {
+        ...current.ticktick,
+        body:NotionCore.fromMarkdown(current.ticktick.body)
+      });
     } else if (state == SyncState.ticktickOff) {
-      await this.ticktick.updateInbox(current.ticktick.id, current.notion);
+      await this.ticktick.updateInbox(current.ticktick.id, {
+        ...current.notion,
+        body: NotionCore.toMakrdown(current.notion.body),
+      });
     } else if (state == SyncState.notionDone) {
       await this.ticktick.updateInbox(current.ticktick.id, {
         done: true,

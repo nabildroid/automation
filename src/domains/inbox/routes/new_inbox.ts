@@ -45,11 +45,14 @@ export default class NewInbox implements IRoute {
         title: task.title,
         done: task.done,
         tags: task.tags,
-        body: "", // todo implement this!
+        body: NotionCore.fromMarkdown(task.body),
       });
     } else {
       task = (await this.notion.getInbox(id))!;
-      associatedTask = await this.ticktick.addToInbox(task);
+      associatedTask = await this.ticktick.addToInbox({
+        ...task,
+        body: NotionCore.toMakrdown(task.body),
+      });
     }
 
     const syncedInboxes: syncedInboxes = {

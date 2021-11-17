@@ -12,9 +12,14 @@ export default class NotionCore<Config extends { [key: string]: string }> {
     this.config = config;
   }
 
-  static childrenToMarkdown(children: Block[]): string {
+  static toMakrdown(children: Block[]): string {
     // todo implement this function
     return "markdown content";
+  }
+
+  static fromMarkdown(content: string): Block[] {
+    // todo implement this function
+    return [];
   }
 
   static extractProperty<T extends any>(

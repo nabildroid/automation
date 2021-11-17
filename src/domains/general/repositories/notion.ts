@@ -34,6 +34,6 @@ export default class Notion extends NotionCore<Config> {
       block_id: blog.id,
     });
 
-    return NotionCore.childrenToMarkdown(children.results);
+    return NotionCore.toMakrdown(children.results);
   }
 }

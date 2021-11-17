@@ -17,7 +17,7 @@ export default class NewNotionInbox implements IRoute {
 
     const { id } = await this.notion.addToInbox({
       tags: [],
-      body: body,
+      body: Notion.fromMarkdown(body),
       done: false,
       title: title,
     });
