@@ -52,7 +52,7 @@ export default class InboxService extends Service {
     this.configRoutes(
       [
         ["post", "/notion", new NewNotionInbox(this.notion)],
-        ["post", "/tweets/:id", new SaveTweets(this.notion, this.twitter)],
+        ["post", "/tweets/:id?", new SaveTweets(this.notion, this.twitter)],
         ["post", "/", new NewInbox(this.db, this.notion, this.ticktick)],
         [
           "post",
