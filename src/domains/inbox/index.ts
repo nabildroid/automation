@@ -10,15 +10,19 @@ import TicktickClient from "../../services/ticktick";
 import { Bucket } from "@google-cloud/storage";
 import Storage from "./repositories/storage";
 import NewInbox from "./routes/new_inbox";
+import TwitterClient from "../../services/twitter";
+import Twitter from "./repositories/twitter";
+import SaveTweets from "./routes/save_tweets";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
   firestore: FirebaseFirestore.Firestore;
   tickitck: {
-  ticktickClient: TicktickClient;
+    ticktickClient: TicktickClient;
     projects: TicktickConfig;
   };
   bucket: Bucket;
+  twitter: TwitterClient;
 };
 
 export default class InboxService extends Service {
@@ -27,7 +31,7 @@ export default class InboxService extends Service {
   db: Firestore;
   ticktick: Ticktick;
   storage: Storage;
-
+  twitter: Twitter;
   constructor(config: ServiceConfig) {
     super();
 
@@ -37,6 +41,7 @@ export default class InboxService extends Service {
       config.tickitck.ticktickClient,
       config.tickitck.projects
     );
+    this.twitter = new Twitter(config.twitter);
     this.storage = new Storage(config.bucket);
 
     this.initRoutes();
@@ -47,6 +52,7 @@ export default class InboxService extends Service {
     this.configRoutes(
       [
         ["post", "/notion", new NewNotionInbox(this.notion)],
+        ["post", "/tweets/:id", new SaveTweets(this.notion, this.twitter)],
         ["post", "/", new NewInbox(this.db, this.notion, this.ticktick)],
         [
           "post",

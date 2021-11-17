@@ -64,6 +64,7 @@ export default class App {
           inbox: this.config.notionConfig.inbox,
         },
       },
+      twitter: twitterClient,
     });
 
     new JournalService({
