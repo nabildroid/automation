@@ -3,6 +3,7 @@ import { Block } from "@notionhq/client/build/src/api-types";
 import { TaskContent } from "../../../core/entities/task";
 import NotionCore from "../../../core/repositories/notion_core";
 import NotionInbox, { NotionInboxMetadata } from "../models/notion_inbox";
+import Tweet from "../models/tweet";
 
 export type Config = {
   inbox: string;
@@ -130,6 +131,74 @@ export default class Notion extends NotionCore<Config> {
       tags: [],
       body: [],
     };
+  }
+
+  static TweetsTemplate(tweets: Tweet[], root = true): Block[] {
+    const childrens: Block[] = [];
+
+    for (const tweet of tweets) {
+      if (tweet.image) {
+        childrens.push({
+          image: {
+            external: {
+              url: tweet.image!,
+            },
+          },
+        } as Block);
+      }
+
+      childrens.push({
+        bulleted_list_item: {
+          text: [
+            {
+              type: "text",
+              text: {
+                content: tweet.text,
+              },
+            },
+          ],
+          children: tweet.childrens?.length
+            ? [
+                {
+                  toggle: {
+                    text: [
+                      {
+                        type: "text",
+                        text: {
+                          content: tweet.childrens[0].text.split("\n")[0],
+                        },
+                      },
+                    ],
+                    children: [
+                      ...Notion.TweetsTemplate(tweet.childrens, false),
+                      {
+                        embed: {
+                          url: tweet.childrens[0].link,
+                        },
+                      },
+                    ],
+                  },
+                },
+              ]
+            : undefined,
+        },
+      } as Block);
+
+      if (root) {
+        childrens.push({
+          type: "divider",
+          divider: {},
+        } as unknown as Block);
+        childrens.push({
+          type: "paragraph",
+          paragraph: {
+            text: [{ text: { content: "" } }],
+          },
+        } as Block);
+      }
+    }
+
+    return childrens;
   }
 }
 
