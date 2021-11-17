@@ -2,7 +2,7 @@ import { InputPropertyValueMap } from "@notionhq/client/build/src/api-endpoints"
 import { Block } from "@notionhq/client/build/src/api-types";
 import { TaskContent } from "../../../core/entities/task";
 import NotionCore from "../../../core/repositories/notion_core";
-import NotionInbox from "../models/notion_inbox";
+import NotionInbox, { NotionInboxMetadata } from "../models/notion_inbox";
 
 export type Config = {
   inbox: string;
@@ -31,34 +31,8 @@ export default class Notion extends NotionCore<Config> {
     };
   }
 
-  async updateInbox(id: string, content: Partial<TaskContent>) {
-    const properties: InputPropertyValueMap = {};
-    if (content.done) {
-      properties["done"] = {
-        type: "checkbox",
-        checkbox: content.done,
-      };
-    }
-    if (content.tags) {
-      properties["tags"] = {
-        type: "multi_select",
-        multi_select: content.tags.map((tag) => ({ name: tag })),
-      };
-    }
-
-    if (content.title) {
-      properties["title"] = {
-        type: "title",
-        title: [
-          {
-            type: "text",
-            text: {
-              content: content.title,
-            },
-          },
-        ],
-      };
-    }
+  async updateInbox(id: string, content: Partial<TaskContent<Block[]>>) {
+    const { properties, body } = createInboxItem(content, {});
 
     await this.client.pages.update({
       page_id: id,
@@ -75,49 +49,18 @@ export default class Notion extends NotionCore<Config> {
     });
   }
 
-  async addToInbox(content: TaskContent): Promise<NotionInbox> {
-    const properties: InputPropertyValueMap = {};
-    properties["done"] = {
-      type: "checkbox",
-      checkbox: content.done,
-    };
-    properties["tags"] = {
-      type: "multi_select",
-      multi_select: content.tags.map((tag) => ({ name: tag })),
-    };
-    properties["title"] = {
-      type: "title",
-      title: [
-        {
-          type: "text",
-          text: {
-            content: content.title,
-          },
-        },
-      ],
-    };
+  async addToInbox(
+    content: TaskContent<Block[]>,
+    metadata?: NotionInboxMetadata
+  ): Promise<NotionInbox> {
+    const { properties, body } = createInboxItem(content, metadata ?? {});
 
     const { id, parent } = await this.client.pages.create({
       parent: {
         database_id: this.config.inbox,
       },
       properties: properties,
-      children: content.body
-        ? ([
-            {
-              paragraph: {
-                text: [
-                  {
-                    type: "text",
-                    text: {
-                      content: content.body,
-                    },
-                  },
-                ],
-              },
-            },
-          ] as Block[])
-        : [],
+      children: body,
     });
 
     return {
@@ -127,7 +70,7 @@ export default class Notion extends NotionCore<Config> {
       source: "notion",
       title: content.title,
       tags: [],
-      body: "",
+      body: content.body,
     };
   }
 
@@ -185,7 +128,71 @@ export default class Notion extends NotionCore<Config> {
       source: "notion",
       title: `Screenshot ${new Date().toISOString()}`,
       tags: [],
-      body: "",
+      body: [],
     };
   }
+}
+
+function createInboxItem(
+  content: Partial<TaskContent<Block[]>>,
+  meta: NotionInboxMetadata
+) {
+  const properties: InputPropertyValueMap = {};
+
+  if (content.done !== undefined)
+    properties["done"] = {
+      type: "checkbox",
+      checkbox: content.done,
+    };
+
+  if (content.tags !== undefined)
+    properties["tags"] = {
+      type: "multi_select",
+      multi_select: content.tags.map((tag) => ({ name: tag })),
+    };
+
+  if (content.title !== undefined)
+    properties["title"] = {
+      type: "title",
+      title: [
+        {
+          type: "text",
+          text: {
+            content: content.title,
+          },
+        },
+      ],
+    };
+
+  if (meta.note !== undefined)
+    properties["Note"] = {
+      type: "checkbox",
+      checkbox: meta.note,
+    };
+
+  if (meta.context !== undefined)
+    properties["context"] = {
+      type: "multi_select",
+      multi_select: meta.context.map((tag) => ({ name: tag })),
+    };
+
+  if (meta.source !== undefined)
+    properties["source"] = {
+      type: "url",
+      url: meta.source,
+    };
+
+  if (meta.nextCheck !== undefined) {
+    properties["nextCheck"] = {
+      type: "date",
+      date: {
+        start: meta.nextCheck.toISOString(),
+      },
+    };
+  }
+
+  return {
+    properties,
+    body: (content.body ?? []) as Block[],
+  };
 }
