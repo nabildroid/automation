@@ -27,7 +27,7 @@ export default class Notion extends NotionCore<Config> {
       done: Notion.extractProperty<boolean>("done", page.properties),
       source: "notion",
       parent: (page.parent as any).database_id,
-      body: "",
+      body: [],
     };
   }
 

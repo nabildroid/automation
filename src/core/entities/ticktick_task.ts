@@ -1,7 +1,7 @@
-import Task from "./task";
+import { TaskContent, TaskReference } from "./task";
 
-export default interface TicktickTask extends Task {
-	source: "ticktick";
-	title: string;
-	tags: string[];
+export default interface TicktickTask
+  extends TaskContent<string>,
+    TaskReference {
+  source: "ticktick";
 }

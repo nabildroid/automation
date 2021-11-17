@@ -5,13 +5,14 @@ export interface TaskReference {
   parent: string;
   source: Sources;
 }
+
 export default interface Task extends TaskReference {
   done: boolean;
 }
 
-export interface TaskContent {
+export interface TaskContent<T> {
   title: string;
-  body: string;
+  body: T;
   tags: string[];
   done: boolean;
 }

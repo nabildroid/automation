@@ -13,7 +13,7 @@ export default class Ticktick {
     this.config = config;
   }
 
-  async updateInbox(id: string, content: Partial<TaskContent>) {
+  async updateInbox(id: string, content: Partial<TaskContent<string>>) {
     await this.client.updateTasks([
       {
         id,
@@ -22,7 +22,7 @@ export default class Ticktick {
         status: content?.done ? 2 : 0,
         tags: content?.tags,
         title: content?.title,
-      }
+      },
     ]);
   }
 
@@ -35,7 +35,7 @@ export default class Ticktick {
     ]);
   }
 
-  async addToInbox(content: TaskContent): Promise<ticktick_task> {
+  async addToInbox(content: TaskContent<string>): Promise<ticktick_task> {
     const { data, status } = await this.client.createTasks([
       {
         title: content.title,
@@ -58,19 +58,20 @@ export default class Ticktick {
 
   async getTask(id: string, list: string): Promise<ticktick_task | undefined> {
     try {
-    const { data, status } = await this.client.getTask(id, list);
+      const { data, status } = await this.client.getTask(id, list);
 
-    if (status != 200) {
+      if (status != 200) {
         throw new Error("unable to get the task");
-    } else {
-      return {
-        id: data.id,
-        parent: data.projectId,
-        title: data.title,
-        done: data.status == 2,
-        tags: data.tags || [],
-        source: "ticktick",
-      };
+      } else {
+        return {
+          id: data.id,
+          parent: data.projectId,
+          title: data.title,
+          done: data.status == 2,
+          tags: data.tags || [],
+          source: "ticktick",
+          body: data.content,
+        };
       }
     } catch (error) {
       return undefined;
