@@ -10,6 +10,7 @@ import JournalService from "./domains/journal";
 import Firestore from "./core/repositories/firestore";
 import GeneralService from "./domains/general";
 import TicktickService from "./domains/tickitck";
+import TwitterClient from "./services/twitter";
 
 export default class App {
   private config!: AppConfig;
@@ -37,6 +38,8 @@ export default class App {
         auth: this.config.auth.ticktick,
       }
     );
+
+    const twitterClient = new TwitterClient(this.config.auth.twitter);
 
     new FlashcardService({
       firestore,

@@ -2,6 +2,7 @@ interface AuthServices {
   notion: string;
   ticktick?: string;
   pocket: string;
+  twitter:string;
 }
 
 export interface NotionConfig {
