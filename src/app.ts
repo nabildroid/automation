@@ -11,17 +11,24 @@ import Firestore from "./core/repositories/firestore";
 import GeneralService from "./domains/general";
 import TicktickService from "./domains/tickitck";
 import TwitterClient from "./services/twitter";
+import winston from "winston";
 
 export default class App {
   private config!: AppConfig;
   db!: Firestore;
 
-  constructor(server: Express) {
+  constructor(server: Express, logging: winston.Logger) {
     server.use("/flashcard", FlashcardService.route);
     server.use("/inbox", InboxService.route);
     server.use("/journal", JournalService.route);
     server.use("/general", GeneralService.route);
     server.use("/ticktick", TicktickService.route);
+
+    FlashcardService.logger = logging.child({ domain: "flashcard" });
+    InboxService.logger = logging.child({ domain: "inbox" });
+    JournalService.logger = logging.child({ domain: "journal" });
+    GeneralService.logger = logging.child({ domain: "general" });
+    TicktickService.logger = logging.child({ domain: "tictick" });
   }
 
   async init(firestore: FirebaseFirestore.Firestore, bucket: Bucket) {

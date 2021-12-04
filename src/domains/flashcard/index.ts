@@ -8,6 +8,7 @@ import SyncFlashcards from "./routes/sync_flashcards";
 import syncOfflineFlashcards from "./routes/sync_offline_flashcards";
 import { bus } from "../..";
 import Flashcard from "./models/flashcard";
+import winston from "winston";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
@@ -16,6 +17,8 @@ type ServiceConfig = {
 
 export default class FlashcardService extends Service {
   static route = Router();
+  static logger?: winston.Logger;
+
   notion: Notion;
   db: Firestore;
   constructor(config: ServiceConfig) {
@@ -29,7 +32,7 @@ export default class FlashcardService extends Service {
   }
 
   initRoutes() {
-    const { route } = FlashcardService;
+    const { route, logger } = FlashcardService;
     this.configRoutes(
       [
         ["get", "/", new Flashcards(this.db)],
@@ -37,7 +40,8 @@ export default class FlashcardService extends Service {
         ["post", "/sync", new SyncFlashcards(this.notion, this.db)],
         ["post", "/offline", new syncOfflineFlashcards(this.db)],
       ],
-      route
+      route,
+      logger
     );
   }
 

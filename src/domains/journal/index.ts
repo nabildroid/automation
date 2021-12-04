@@ -1,4 +1,5 @@
 import { Router } from "express";
+import winston from "winston";
 import Service from "../../core/service";
 import TicktickClient from "../../services/ticktick";
 import Notion, { Config as NotionConfig } from "./repositories/notion";
@@ -12,6 +13,8 @@ type ServiceConfig = {
 
 export default class JournalService extends Service {
   static route = Router();
+  static logger?: winston.Logger;
+
   notion: Notion;
   ticktick: Ticktick;
 
@@ -24,10 +27,11 @@ export default class JournalService extends Service {
   }
 
   initRoutes() {
-    const { route } = JournalService;
+    const { route, logger } = JournalService;
     this.configRoutes(
       [["post", "/", new CompletedTaskJournal(this.notion, this.ticktick)]],
-      route
+      route,
+      logger
     );
   }
 }

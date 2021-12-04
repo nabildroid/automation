@@ -6,18 +6,21 @@ import NotionBlog from "./routes/notion_blog";
 import ReportMode from "./routes/report_mode";
 import SyncWithPocket from "./routes/sync_with_pocked";
 import PocketClient from "../../services/pocket";
+import winston from "winston";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
   firestore: FirebaseFirestore.Firestore;
-  pocketClient:PocketClient;
+  pocketClient: PocketClient;
 };
 
 export default class GeneralService extends Service {
   static route = Router();
+  static logger?: winston.Logger;
+
   notion: Notion;
   db: Firestore;
-  pocketClient:PocketClient;
+  pocketClient: PocketClient;
 
   constructor(config: ServiceConfig) {
     super();
@@ -30,14 +33,19 @@ export default class GeneralService extends Service {
   }
 
   initRoutes() {
-    const { route } = GeneralService;
+    const { route, logger } = GeneralService;
     this.configRoutes(
       [
-        ["get", "/blog", new NotionBlog(this.notion,this.db)],
+        ["get", "/blog", new NotionBlog(this.notion, this.db)],
         ["post", "/report", new ReportMode(this.db)],
-        ["post", "/pocket/sync",new SyncWithPocket(this.db,this.pocketClient) ],
+        [
+          "post",
+          "/pocket/sync",
+          new SyncWithPocket(this.db, this.pocketClient),
+        ],
       ],
-      route
+      route,
+      logger
     );
   }
 }

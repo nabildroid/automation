@@ -6,6 +6,7 @@ import Ticktick from "./repositories/ticktick";
 import GeneralStatistics from "./routes/general_statistics";
 import Wallpaper from "./routes/wallpaper";
 import SaveRanking from "./routes/save_ranking";
+import winston from "winston";
 
 type ServiceConfig = {
   firestore: FirebaseFirestore.Firestore;
@@ -14,6 +15,8 @@ type ServiceConfig = {
 
 export default class TicktickService extends Service {
   static route = Router();
+  static logger?: winston.Logger;
+
   db: Firestore;
   ticktick: Ticktick;
 
@@ -27,7 +30,7 @@ export default class TicktickService extends Service {
   }
 
   initRoutes() {
-    const { route } = TicktickService;
+    const { route,logger } = TicktickService;
     this.configRoutes(
       [
         ["get", "/statistics/general", new GeneralStatistics(this.ticktick)],
@@ -38,7 +41,7 @@ export default class TicktickService extends Service {
         ],
         ["get", "/wallpaper", new Wallpaper(this.ticktick,this.db)],
       ],
-      route
+      route,logger
     );
   }
 }

@@ -13,6 +13,7 @@ import NewInbox from "./routes/new_inbox";
 import TwitterClient from "../../services/twitter";
 import Twitter from "./repositories/twitter";
 import SaveTweets from "./routes/save_tweets";
+import winston from "winston";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
@@ -27,6 +28,8 @@ type ServiceConfig = {
 
 export default class InboxService extends Service {
   static route = Router();
+  static logger?: winston.Logger;
+
   notion: Notion;
   db: Firestore;
   ticktick: Ticktick;
@@ -48,7 +51,7 @@ export default class InboxService extends Service {
   }
 
   initRoutes() {
-    const { route } = InboxService;
+    const { route,logger } = InboxService;
     this.configRoutes(
       [
         ["post", "/notion", new NewNotionInbox(this.notion)],
@@ -65,7 +68,7 @@ export default class InboxService extends Service {
           new UploadScreenshot(this.notion, this.storage),
         ],
       ],
-      route
+      route,logger
     );
   }
 }
