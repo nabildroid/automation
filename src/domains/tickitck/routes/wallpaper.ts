@@ -15,7 +15,7 @@ export default class Wallpaper implements IRoute {
 
   async handler(req: Request, res: Response) {
     const ranks = await this.db.getRanking();
-    const weeks = this.combineRanksInWeeks(ranks);
+    const weeks = this.combineRanksInWeeks(Array.from(ranks));
     const scores = this.computeWeeksScore(weeks);
 
     const allHabits = await this.ticktick.getHabits();
