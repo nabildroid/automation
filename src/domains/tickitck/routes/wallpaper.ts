@@ -104,7 +104,7 @@ export default class Wallpaper implements IRoute {
     const weeks: Ranking[][] = [[]];
 
     let prevDays = new Set();
-    ranks.forEach((rank) => {
+    ranks.reverse().forEach((rank) => {
       if (prevDays.has(rank.date.getDay())) {
         weeks.push([]);
         prevDays = new Set();
@@ -114,6 +114,6 @@ export default class Wallpaper implements IRoute {
       weeks[weeks.length - 1].push(rank);
     });
 
-    return weeks.filter((week) => week.length > 1);
+    return weeks.filter((week) => week.length > 1).reverse();
   }
 }
