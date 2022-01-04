@@ -11,13 +11,17 @@ enum API {
   TASK_COMPLEYED = "/v2/project/all/completedInAll/",
   STATISTICS_GENERAL = "/v2/statistics/general",
   BATCH_TASKS = "/v2/batch/task",
+  BATCH_POMODORO = "/v2/batch/pomodoro",
   RANKING = "/v3/user/ranking",
   HABITS = "v2/habits",
   HABITS_CHECKIN = "/v2/habitCheckins/query",
+  PROJECTS = "/v2/projects",
 }
 
 export default class TicktickClient {
   private client!: AxiosInstance;
+
+  userId!:string;
 
   constructor(
     email: string,
@@ -58,6 +62,7 @@ export default class TicktickClient {
     console.log("validating the auth");
     try {
       const response = await this.client.get(API.STATUS);
+      this.userId = response.data.userId; // todo refactor this!
       return response.status == 200;
     } catch (e) {
       return false;
@@ -167,6 +172,21 @@ export default class TicktickClient {
     });
   }
 
+  addPomodoro(pomodoro: Omit<Pomodoro, "id">) {
+    const pomo = createPomodoro({
+      ...pomodoro,
+      id: TicktickClient.randomTaskId(),
+    });
+
+    this.client.post(API.BATCH_POMODORO, {
+      add: [pomo],
+    });
+  }
+
+  getProjects(){
+    return this.client.get(API.PROJECTS);
+  }
+  
   static parseTaskUrl(url: string) {
     // todo check the url validity
     const parts = url.split("/");
@@ -209,6 +229,57 @@ type OptionalTaskParameters = {
   tags?: string[];
   content?: string;
   id?: string;
+  focus?: TaskFocus[];
+  pomoFocus?: PomoFocus[];
+};
+
+type TaskFocus = {
+  estimatedDuration?: number;
+  estimatedPomo?: number;
+  pomoCount?: number;
+  pomoDuration?: number;
+  stopwatchDuration?: number;
+  userId?: number;
+};
+
+type PomoFocus = {
+  userId: 117367344;
+  count: number;
+  estimatedPomo: number;
+  duration: number;
+};
+
+function createPomodoro(pomodoro: Pomodoro) {
+  return {
+    local: pomodoro.local ?? true,
+    id: pomodoro.id,
+    startTime: pomodoro.start.toISOString(),
+    status: pomodoro.status ?? 1,
+    endTime: pomodoro.end.toISOString(),
+    taskId: pomodoro.taskId,
+    tasks: [
+      {
+        taskId: pomodoro.taskId,
+        title: pomodoro.taskTitle,
+        tags: pomodoro.tags,
+        projectName: pomodoro.projectName,
+        startTime: pomodoro.start.toISOString(),
+        endTime: pomodoro.end.toISOString(),
+      },
+    ],
+  };
+}
+
+type Pomodoro = {
+  local?: boolean;
+  start: Date;
+  end: Date;
+  taskId: string;
+  id: string;
+  taskTitle: string;
+  projectName: string;
+  tags: string[];
+  status?: number;
 };
 
 function createTask(task: OptionalTaskParameters) {
@@ -223,7 +294,7 @@ function createTask(task: OptionalTaskParameters) {
     dueDate: task.due?.toISOString() || null,
     etag: "",
     exDate: [],
-    focusSummaries: [],
+    focusSummaries: task.focus ?? [],
     id: task.id ?? "",
     isAllDay: false,
     isFloating: false,

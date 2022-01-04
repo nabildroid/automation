@@ -7,6 +7,7 @@ import GeneralStatistics from "./routes/general_statistics";
 import Wallpaper from "./routes/wallpaper";
 import SaveRanking from "./routes/save_ranking";
 import winston from "winston";
+import AddPomodoro from "./routes/add_pomodoro";
 
 type ServiceConfig = {
   firestore: FirebaseFirestore.Firestore;
@@ -40,6 +41,7 @@ export default class TicktickService extends Service {
           new SaveRanking(this.ticktick, this.db),
         ],
         ["get", "/wallpaper", new Wallpaper(this.ticktick,this.db)],
+        ["post", "/pomodoro/add", new AddPomodoro(this.ticktick)],
       ],
       route,logger
     );

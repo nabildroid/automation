@@ -3,6 +3,7 @@ import TicktickClient, {
 } from "../../../services/ticktick";
 import GeneralStats from "../models/general_stats";
 import habit, { habitCheckIn } from "../models/habit";
+import Project from "../models/project";
 import Ranking from "../models/ranking";
 
 export default class Ticktick {
@@ -48,7 +49,6 @@ export default class Ticktick {
       const { checkins } = data;
       const entities = Object.entries(checkins) as [String, any[]][];
 
-      
       // todo refactor this
       return entities
         .map(([habitId, logs]) => [
@@ -79,6 +79,76 @@ export default class Ticktick {
         taskByDay: data.taskByDay,
       };
     } else throw Error("unable to fetch ticktick general statistics");
+  }
+
+  async addPomodoroTask(id: string, projectId: string, duration: number) {
+    const task = await this.fetchRawTask(id, projectId);
+
+    const focus = task?.focusSummaries?.shift() ?? {
+      estimatedPomo: 0,
+      pomoCount: 0,
+      pomoDuration: 0,
+      stopwatchDuration: 0,
+      userId: this.client.userId,
+    };
+
+    const pomo = task?.pomodoroSummaries?.shift() ?? {
+      userId: this.client.userId,
+      count: 0,
+      estimatedPomo: 0,
+      duration: 0,
+    };
+
+    focus.pomoCount++;
+    focus.pomoDuration += duration;
+    pomo.pomoCount++;
+    pomo.duration += Math.floor(duration / 60);
+
+
+    const allProjects = await this.getProject();
+    const thisProject = allProjects.find(p=>p.id == projectId)!;
+    
+    await this.client.updateTasks([
+      {
+        id,
+        project: projectId,
+        focus: [focus],
+        pomoFocus: [pomo],
+      },
+    ]);
+
+    
+    await this.client.addPomodoro({
+      taskId: id,
+      tags: task.tags,
+      taskTitle: task.title,
+      start: new Date(new Date().setSeconds(-1 * duration)),
+      end: new Date(),
+      projectName: thisProject.name,
+    });
+  }
+
+  async getProject(): Promise<Project[]> {
+    const { data, status } = await this.client.getProjects();
+    // todo cache the projects
+    if (status == 200) {
+      return (data as any[]).map((p) => ({
+        closed: p.closed ?? false,
+        color: p.color,
+        id: p.id,
+        kind: p.kind,
+        modifiedTime: new Date(p.modifiedTime),
+        name: p.name,
+      }));
+    } else throw Error("unable to fetch ticktick projects");
+  }
+
+  private async fetchRawTask(id: string, projectId: string) {
+    const { data, status } = await this.client.getTask(id, projectId);
+
+    if (status == 200) {
+      return data;
+    } else throw Error("unable to fetch ticktick raw task");
   }
 }
 
