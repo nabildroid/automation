@@ -1,3 +1,4 @@
+import TicktickTask from "../../../core/entities/ticktick_task";
 import TicktickClient, {
   tickitckToDateformat,
 } from "../../../services/ticktick";
@@ -104,10 +105,9 @@ export default class Ticktick {
     pomo.pomoCount++;
     pomo.duration += Math.floor(duration / 60);
 
-
     const allProjects = await this.getProject();
-    const thisProject = allProjects.find(p=>p.id == projectId)!;
-    
+    const thisProject = allProjects.find((p) => p.id == projectId)!;
+
     await this.client.updateTasks([
       {
         id,
@@ -117,7 +117,6 @@ export default class Ticktick {
       },
     ]);
 
-    
     await this.client.addPomodoro({
       taskId: id,
       tags: task.tags,
@@ -141,6 +140,24 @@ export default class Ticktick {
         name: p.name,
       }));
     } else throw Error("unable to fetch ticktick projects");
+  }
+
+  async getDefaultTasks(): Promise<(TicktickTask & { created: Date })[]> {
+    const { data, status } = await this.client.check();
+
+    if (status == 200) {
+      const tasks = [...data.syncTaskBean.update, ...data.syncTaskBean.add];
+      return tasks.map((task) => ({
+        body: "",
+        id: task.id,
+        created: new Date(task.modifiedTime),
+        done: task.status == 2,
+        parent: task.projectId,
+        source: "ticktick",
+        tags: task.tags,
+        title: task.title,
+      }));
+    } else throw Error("unable to fetch ticktick default tasks AKA check");
   }
 
   private async fetchRawTask(id: string, projectId: string) {

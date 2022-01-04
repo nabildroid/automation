@@ -16,6 +16,7 @@ enum API {
   HABITS = "v2/habits",
   HABITS_CHECKIN = "/v2/habitCheckins/query",
   PROJECTS = "/v2/projects",
+  CHECK="v2/batch/check/0",
 }
 
 export default class TicktickClient {
@@ -185,6 +186,10 @@ export default class TicktickClient {
 
   getProjects(){
     return this.client.get(API.PROJECTS);
+  }
+
+  check(){
+    return this.client.get(API.CHECK);
   }
   
   static parseTaskUrl(url: string) {
