@@ -29,14 +29,18 @@ const logger = Winston.createLogger({
 require("dotenv").config();
 const port = process.env.PORT || 8080;
 const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT || "{}");
-const authorization = process.env.AUTHORIZATION;
-
+const authorization = process.env.SUPERNABIL_AUTHORIZATION;
 
 const server = Express();
 server.use(Express.json());
 
 server.use((req, res, next) => {
-  if (!authorization || req.headers.authorization == authorization) {
+  const isPrivateRequest = needAuthorization(req);
+
+  if (
+    (isPrivateRequest && req.headers.authorization == authorization) ||
+    !isPrivateRequest
+  ) {
     next();
   } else {
     res.redirect("https://laknabil.notion.site");
