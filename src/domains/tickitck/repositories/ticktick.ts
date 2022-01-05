@@ -151,7 +151,9 @@ export default class Ticktick {
       return tasks.map((task) => ({
         body: "",
         id: task.id,
-        created: new Date(task.modifiedTime),
+        created: task.dueDate
+          ? new Date(task.dueDate)
+          : new Date(task.modifiedTime),
         done: task.status == 2,
         parent: task.projectId,
         source: "ticktick",
