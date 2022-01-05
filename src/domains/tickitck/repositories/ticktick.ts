@@ -110,6 +110,7 @@ export default class Ticktick {
 
     await this.client.updateTasks([
       {
+        ...task,
         id,
         project: projectId,
         focus: [focus],

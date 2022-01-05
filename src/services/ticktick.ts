@@ -16,13 +16,13 @@ enum API {
   HABITS = "v2/habits",
   HABITS_CHECKIN = "/v2/habitCheckins/query",
   PROJECTS = "/v2/projects",
-  CHECK="v2/batch/check/0",
+  CHECK = "v2/batch/check/0",
 }
 
 export default class TicktickClient {
   private client!: AxiosInstance;
 
-  userId!:string;
+  userId!: string;
 
   constructor(
     email: string,
@@ -184,14 +184,14 @@ export default class TicktickClient {
     });
   }
 
-  getProjects(){
+  getProjects() {
     return this.client.get(API.PROJECTS);
   }
 
-  check(){
+  check() {
     return this.client.get(API.CHECK);
   }
-  
+
   static parseTaskUrl(url: string) {
     // todo check the url validity
     const parts = url.split("/");
@@ -258,9 +258,9 @@ function createPomodoro(pomodoro: Pomodoro) {
   return {
     local: pomodoro.local ?? true,
     id: pomodoro.id,
-    startTime:dateTicktickPomodoroFormat(pomodoro.start) ,
+    startTime: dateTicktickPomodoroFormat(pomodoro.start),
     status: pomodoro.status ?? 1,
-    endTime:dateTicktickPomodoroFormat(pomodoro.end) ,
+    endTime: dateTicktickPomodoroFormat(pomodoro.end),
     taskId: pomodoro.taskId,
     tasks: [
       {
@@ -268,8 +268,8 @@ function createPomodoro(pomodoro: Pomodoro) {
         title: pomodoro.taskTitle,
         tags: pomodoro.tags,
         projectName: pomodoro.projectName,
-        startTime:dateTicktickPomodoroFormat(pomodoro.start) ,
-        endTime:dateTicktickPomodoroFormat(pomodoro.end) ,
+        startTime: dateTicktickPomodoroFormat(pomodoro.start),
+        endTime: dateTicktickPomodoroFormat(pomodoro.end),
       },
     ],
   };
@@ -288,9 +288,11 @@ type Pomodoro = {
 };
 
 function createTask(task: OptionalTaskParameters) {
+
+  //todo refactor this!
   return {
     assignee: null,
-    attachments: [],
+    attachments: (task as any)["attachments"] ?? [],
     columnId: "",
     commentCount: 0,
     content: task.content || "",
@@ -298,24 +300,24 @@ function createTask(task: OptionalTaskParameters) {
     creator: null,
     dueDate: task.due?.toISOString() || null,
     etag: "",
-    exDate: [],
+    exDate: (task as any)["exDate"] ?? [],
     focusSummaries: task.focus ?? [],
     id: task.id ?? "",
     isAllDay: false,
     isFloating: false,
     isCalendarNew: false,
-    items: [],
-    kind: "TEXT",
+    items: (task as any)["items"] ?? [],
+    kind: (task as any)["kind"] ?? "TEXT",
     modifiedTime: new Date().toISOString(),
     priority: task.priority ?? 0,
     progress: task.progress ?? 0,
     projectId: task.project ?? null,
-    reminder: "",
-    reminders: [],
-    repeatFrom: "",
+    reminder: (task as any)["reminder"] ?? "",
+    reminders: (task as any)["reminders"] ?? [],
+    repeatFrom: (task as any)["repeatFrom"] ?? "",
     repeatTaskId: task.id ?? "",
     sortOrder: -22265100412464,
-    startDate: null,
+    startDate: (task as any)["startDate"] ?? null,
     status: task.status ?? 0,
     tags: task.tags ?? [],
     timeZone: "Africa/Algiers",
@@ -339,6 +341,6 @@ export function tickitckToDateformat(str: string) {
   return new Date([year, month, day].join(" "));
 }
 
-function dateTicktickPomodoroFormat(date:Date){
-  return date.toISOString().replace("Z","+0000")
+function dateTicktickPomodoroFormat(date: Date) {
+  return date.toISOString().replace("Z", "+0000");
 }
