@@ -258,9 +258,9 @@ function createPomodoro(pomodoro: Pomodoro) {
   return {
     local: pomodoro.local ?? true,
     id: pomodoro.id,
-    startTime: pomodoro.start.toISOString(),
+    startTime:dateTicktickPomodoroFormat(pomodoro.start) ,
     status: pomodoro.status ?? 1,
-    endTime: pomodoro.end.toISOString(),
+    endTime:dateTicktickPomodoroFormat(pomodoro.end) ,
     taskId: pomodoro.taskId,
     tasks: [
       {
@@ -268,8 +268,8 @@ function createPomodoro(pomodoro: Pomodoro) {
         title: pomodoro.taskTitle,
         tags: pomodoro.tags,
         projectName: pomodoro.projectName,
-        startTime: pomodoro.start.toISOString(),
-        endTime: pomodoro.end.toISOString(),
+        startTime:dateTicktickPomodoroFormat(pomodoro.start) ,
+        endTime:dateTicktickPomodoroFormat(pomodoro.end) ,
       },
     ],
   };
@@ -337,4 +337,8 @@ export function tickitckToDateformat(str: string) {
   const day = str.slice(6);
 
   return new Date([year, month, day].join(" "));
+}
+
+function dateTicktickPomodoroFormat(date:Date){
+  return date.toISOString().replace("Z","+0000")
 }

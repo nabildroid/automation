@@ -121,9 +121,9 @@ export default class Ticktick {
       taskId: id,
       tags: task.tags,
       taskTitle: task.title,
-      start: new Date(new Date().setSeconds(-1 * duration)),
+      start: new Date(Date.now()  - duration * 1000),
       end: new Date(),
-      projectName: thisProject.name,
+      projectName: thisProject?.name,
     });
   }
 
