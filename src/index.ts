@@ -5,8 +5,8 @@ import { EventEmitter } from "events";
 import fs from "fs";
 import Winston from "winston"
 
-import {LoggingWinston}  from '@google-cloud/logging-winston';
-
+import { LoggingWinston } from "@google-cloud/logging-winston";
+import { needAuthorization } from "./guard";
 
 const loggingWinston = new LoggingWinston({
   projectId:"supernabil-86c2b",
