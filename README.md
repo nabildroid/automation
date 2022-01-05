@@ -9,18 +9,26 @@ personal Nodejs application for automating and linking several applications toge
   > https://developers.notion.com/changelog/callouts-and-quote-blocks-are-now-supported
 - [ ]  Automate shortcut for uploading picture of the day
 
-  
-  
-- [ ] Ubuntu Pomodoro widget in the top bar connected with ticktick pomodoro & allows the option to select a focus task 
-  > gnome-shell offers js/css interface to build those custom stuff, [Example](https://github.com/paradoxxxzero/gnome-shell-system-monitor-applet/)
-- [ ] Ubuntu Pomodoro widget in the top bar for showing your ticktick score and level
-- [ ]  sync Twitter DB
-  - [ ]  twitter sync followers
-  - [ ]  tweets from phone
-  - [ ]  auto publish tweets
-- [ ]  PC pomodoro timer
+- [x]  add task to Notion Inbox ubuntu #1
+  1. make a keyboard shortcut E.g. SUPER+Q that execute
+
+      ```bash
+      gnome-terminal --hide-menubar  --geometry=80x20+350+150   -- bash quickNote.sh
+      ```
+
+  2. create a cronjob for
+
+      ```bash
+      30,0 * * * *  bash quickNote.sh -a
+      ```
+
+
+
 
 ## Done
+
+- [X]  PC pomodoro timer
+- [X] Ubuntu Pomodoro App in the top bar connected with ticktick pomodoro & allows the option to select a focus task 
 
 - [x]  sync together Notion Inbox DB & TickTick inbox ⇒ IFFF
   + [x]  periodically check for out-of-sync problems
@@ -36,20 +44,6 @@ personal Nodejs application for automating and linking several applications toge
 - [x]  pull up all completed tasks from TickTick and add them to your daily journal as a blocks
 
 - [X]  Report mode
-
-- [x]  add task to Notion Inbox ubuntu #1
-  1. make a keyboard shortcut E.g. SUPER+Q that execute
-
-      ```bash
-      gnome-terminal --hide-menubar  --geometry=80x20+350+150   -- bash quickNote.sh
-      ```
-
-  2. create a cronjob for
-
-      ```bash
-      30,0 * * * *  bash quickNote.sh -a
-      ```
-
 
 - [x]  screenshots to notion Inbox
 
