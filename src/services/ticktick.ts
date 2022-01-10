@@ -153,7 +153,7 @@ export default class TicktickClient {
     tasks: (OptionalTaskParameters & { project: string; id: string })[]
   ) {
     return this.client.post(API.BATCH_TASKS, {
-      update: tasks.map(createTask),
+      update: tasks.map(updateTask),
       addAttachments: [],
       delete: [],
       deleteAttachments: [],
@@ -287,8 +287,25 @@ type Pomodoro = {
   status?: number;
 };
 
-function createTask(task: OptionalTaskParameters) {
+function updateTask(task: OptionalTaskParameters) {
+  return {
+    ...task,
+    content: task.content || "",
+    createdTime: (task.created || new Date()).toISOString(),
+    dueDate: task.due?.toISOString() || null,
+    focusSummaries: task.focus ?? [],
+    id: task.id ?? "",
+    modifiedTime: new Date().toISOString(),
+    priority: task.priority ?? 0,
+    progress: task.progress ?? 0,
+    projectId: task.project ?? null,
+    status: task.status ?? 0,
+    tags: task.tags ?? [],
+    title: task.title,
+  };
+}
 
+function createTask(task: OptionalTaskParameters) {
   //todo refactor this!
   return {
     assignee: null,
