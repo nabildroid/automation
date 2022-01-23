@@ -6,8 +6,7 @@ import Service from "../../core/service";
 import SaveFlashcardsScore from "./routes/save_flashcards_score";
 import SyncFlashcards from "./routes/sync_flashcards";
 import syncOfflineFlashcards from "./routes/sync_offline_flashcards";
-import { bus } from "../..";
-import Flashcard from "./models/flashcard";
+import Flashcard, { FlashcardProgress } from "./models/flashcard";
 import winston from "winston";
 
 type ServiceConfig = {
@@ -46,21 +45,29 @@ export default class FlashcardService extends Service {
   }
 
   initEvents() {
-    bus.addListener("notion.addFlashcard", async (payload) => {
-      await this.notion.addFlashcard(payload);
-    });
+    this.listen<events, events["notion.addFlashcard"]>(
+      "notion.addFlashcard",
+      async (payload) => {
+        await this.notion.addFlashcard(payload);
+      }
+    );
   }
 
-  static emit<T extends FlashcardEvents>(
-    type: T,
-    payload: FlashcardEventPayloads[T]
-  ) {
-    bus.emit(type, payload);
+  static emit<K extends keyof events>(type: K, payload: events[K]) {
+    return Service.emit(type as string, payload);
+  }
+
+  static fetch<T extends keyof awaitEvents>(type: T) {
+    return Service.fetch<awaitEvents, keyof awaitEvents>(type);
   }
 }
 
-type FlashcardEvents = "notion.addFlashcard";
+FlashcardService.fetch("firestore.getTodayscore").then((data) => {});
 
-type FlashcardEventPayloads = {
+interface events {
   ["notion.addFlashcard"]: Flashcard;
-};
+}
+
+interface awaitEvents {
+  ["firestore.getTodayscore"]: FlashcardProgress[];
+}

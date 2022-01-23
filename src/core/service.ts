@@ -46,4 +46,34 @@ export default class Service {
       }
     });
   }
+
+  listen<T extends { [key: string]: any }, P extends { [key: string]: any }>(
+    eventName: keyof T,
+    callback: (payload: P & { eventId: string }) => any
+  ) {
+    bus.addListener(eventName as string, (data) => {
+      callback(data);
+    });
+  }
+
+  protected static emit(type: string, payload?: any) {
+    const rand = Math.floor(Math.random() * 10000);
+    const id = `${type}#${rand}`;
+
+    bus.emit(type, {
+      eventId:id,
+      ...payload,
+    });
+    return id;
+  }
+
+  static fetch<awaitEvents, T extends keyof awaitEvents>(
+    type: T
+  ): Promise<awaitEvents[T]> {
+    const id = Service.emit(type as string);
+
+    return new Promise((res) => {
+      bus.once(id, (data) => res(data as awaitEvents[T]));
+    });
+  }
 }

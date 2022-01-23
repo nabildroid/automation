@@ -14,6 +14,10 @@ import TwitterClient from "../../services/twitter";
 import Twitter from "./repositories/twitter";
 import SaveTweets from "./routes/save_tweets";
 import winston from "winston";
+import { bus } from "../..";
+import { TaskContent } from "../../core/entities/task";
+import { Block } from "@notionhq/client/build/src/api-types";
+import { NotionInboxMetadata } from "./models/notion_inbox";
 
 type ServiceConfig = {
   notion: { auth: string; databases: NotionConfig };
@@ -51,7 +55,7 @@ export default class InboxService extends Service {
   }
 
   initRoutes() {
-    const { route,logger } = InboxService;
+    const { route, logger } = InboxService;
     this.configRoutes(
       [
         ["post", "/notion", new NewNotionInbox(this.notion)],
@@ -68,7 +72,28 @@ export default class InboxService extends Service {
           new UploadScreenshot(this.notion, this.storage),
         ],
       ],
-      route,logger
+      route,
+      logger
     );
   }
+
+  initEvents() {
+    this.listen<Events, Events["notion.addToInbox"]>(
+      "notion.addToInbox",
+      async (payload) => {
+        await this.notion.addToInbox(payload.content, payload.metadata);
+      }
+    );
+  }
+
+  static emit<T extends keyof Events>(type: T, payload: Events[T]) {
+    bus.emit(type, payload);
+  }
 }
+
+type Events = {
+  ["notion.addToInbox"]: {
+    content: TaskContent<Block[]>;
+    metadata?: NotionInboxMetadata | undefined;
+  };
+};
