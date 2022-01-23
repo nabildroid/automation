@@ -1,17 +1,17 @@
 import { Express } from "express";
 import { Bucket } from "@google-cloud/storage";
+import winston from "winston";
 
 import AppConfig from "./core/entities/app_config";
+import Firestore from "./core/repositories/firestore";
 import TicktickClient from "./services/ticktick";
 import PocketClient from "./services/pocket";
+import TwitterClient from "./services/twitter";
 import FlashcardService from "./domains/flashcard";
 import InboxService from "./domains/inbox";
 import JournalService from "./domains/journal";
-import Firestore from "./core/repositories/firestore";
 import GeneralService from "./domains/general";
 import TicktickService from "./domains/tickitck";
-import TwitterClient from "./services/twitter";
-import winston from "winston";
 
 export default class App {
   private config!: AppConfig;
@@ -59,8 +59,8 @@ export default class App {
     });
 
     new InboxService({
-      bucket: bucket,
-      firestore: firestore,
+      bucket,
+      firestore,
       tickitck: {
         ticktickClient: ticktickClient,
         projects: this.config.ticktickConfig,
@@ -91,12 +91,12 @@ export default class App {
           blog: this.config.notionConfig.blog,
         },
       },
-      firestore: firestore,
-      pocketClient: pocketClient,
+      firestore,
+      pocketClient,
     });
 
     new TicktickService({
-      firestore: firestore,
+      firestore,
       ticktick: ticktickClient,
     });
 
