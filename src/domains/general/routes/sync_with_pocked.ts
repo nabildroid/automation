@@ -1,7 +1,9 @@
+import { Block } from "@notionhq/client/build/src/api-types";
 import { Request, Response } from "express";
 import { IRoute } from "../../../core/service";
 import PocketClient from "../../../services/pocket";
 import FlashcardService from "../../flashcard";
+import InboxService from "../../inbox";
 import Firestore from "../repositories/firestore";
 
 export default class SyncWithPocket implements IRoute {
@@ -26,12 +28,30 @@ export default class SyncWithPocket implements IRoute {
     const promises = articles.map(async (article) => {
       for (const item of article.highlights) {
         if (!checked.highlighIds.includes(item.id)) {
-          FlashcardService.emit("notion.addFlashcard", {
-            term: article.title,
-            definition: item.text,
-            tags: article.tags,
-            from: "pocket",
-            source: article.url,
+          InboxService.rawEmit("notion.addToInbox", {
+            content: {
+              title: article.title,
+              body: [
+                {
+                  paragraph: {
+                    text: [
+                      {
+                        text: {
+                          content: item.text,
+                        },
+                        type: "text",
+                      },
+                    ],
+                  },
+                } as Block, // todo to much details
+              ],
+              tags: article.tags,
+              done: false,
+            },
+            metadata: {
+              context: ["pocket"],
+              source: article.url,
+            },
           });
 
           newHighlightIds.push(item.id);

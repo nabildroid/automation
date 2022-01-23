@@ -54,15 +54,14 @@ export default class FlashcardService extends Service {
   }
 
   static emit<K extends keyof events>(type: K, payload: events[K]) {
-    return Service.emit(type as string, payload);
+    return Service.rawEmit(type as string, payload);
   }
 
   static fetch<T extends keyof awaitEvents>(type: T) {
-    return Service.fetch<awaitEvents, keyof awaitEvents>(type);
+    return Service.rawFetch<awaitEvents, keyof awaitEvents>(type);
   }
 }
 
-FlashcardService.fetch("firestore.getTodayscore").then((data) => {});
 
 interface events {
   ["notion.addFlashcard"]: Flashcard;

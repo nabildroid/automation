@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { Response, Request } from "express";
 import winston from "winston";
+import { bus } from "..";
 
 export interface IRoute {
   handler: (
@@ -56,21 +57,21 @@ export default class Service {
     });
   }
 
-  protected static emit(type: string, payload?: any) {
+   static rawEmit(type: string, payload?: any) {
     const rand = Math.floor(Math.random() * 10000);
     const id = `${type}#${rand}`;
 
     bus.emit(type, {
-      eventId:id,
+      eventId: id,
       ...payload,
     });
     return id;
   }
 
-  static fetch<awaitEvents, T extends keyof awaitEvents>(
+   static rawFetch<awaitEvents, T extends keyof awaitEvents>(
     type: T
   ): Promise<awaitEvents[T]> {
-    const id = Service.emit(type as string);
+    const id = Service.rawEmit(type as string);
 
     return new Promise((res) => {
       bus.once(id, (data) => res(data as awaitEvents[T]));
