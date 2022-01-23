@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { Response, Request } from "express";
 import winston from "winston";
-import { bus } from "..";
+import { bus, errors } from "..";
 
 export interface IRoute {
   handler: (
@@ -36,7 +36,7 @@ export default class Service {
 
           timer?.done({ message: config[1] });
         } catch (e) {
-          logger?.error(config[1]);
+          errors.report(e, req);
         }
       };
 
@@ -57,7 +57,7 @@ export default class Service {
     });
   }
 
-   static rawEmit(type: string, payload?: any) {
+  static rawEmit(type: string, payload?: any) {
     const rand = Math.floor(Math.random() * 10000);
     const id = `${type}#${rand}`;
 
@@ -68,7 +68,7 @@ export default class Service {
     return id;
   }
 
-   static rawFetch<awaitEvents, T extends keyof awaitEvents>(
+  static rawFetch<awaitEvents, T extends keyof awaitEvents>(
     type: T
   ): Promise<awaitEvents[T]> {
     const id = Service.rawEmit(type as string);

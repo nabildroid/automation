@@ -3,6 +3,8 @@ import Express from "express";
 import admin from "firebase-admin";
 import Winston from "winston";
 import { LoggingWinston } from "@google-cloud/logging-winston";
+import { ErrorReporting } from "@google-cloud/error-reporting";
+
 import { EventEmitter } from "events";
 
 import App from "./app";
@@ -13,6 +15,19 @@ require("dotenv").config();
 const port = process.env.PORT || 8080;
 const serviceAccount = JSON.parse(process.env.SERVICE_ACCOUNT || "{}");
 const authorization = process.env.SUPERNABIL_AUTHORIZATION;
+
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+
+fs.writeFileSync(".service_account.js", JSON.stringify(serviceAccount));
+process.env.GOOGLE_APPLICATION_CREDENTIALS = ".service_account.js";
+
+export const errors = new ErrorReporting({
+  projectId: "supernabil-86c2b",
+  reportMode: "always",
+  serviceContext: {
+    service: "supernabil heroku",
+  },
+});
 
 const loggingWinston = new LoggingWinston({
   projectId: "supernabil-86c2b",
@@ -42,11 +57,6 @@ server.use((req, res, next) => {
   }
 });
 
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-
-fs.writeFileSync(".service_account.js", JSON.stringify(serviceAccount));
-process.env.GOOGLE_APPLICATION_CREDENTIALS = ".service_account.js";
-
 const storage = admin.storage();
 const bucket = storage.bucket(process.env.BUCKET);
 
@@ -56,10 +66,14 @@ const app = new App(server, logger);
 
 const timer = logger.startTimer();
 
-app.init(admin.firestore(), bucket).then(() => {
-  timer.done({ message: "Init App" });
-});
+app
+  .init(admin.firestore(), bucket)
+  .then(() => {
+    timer.done({ message: "Init App" });
+  })
+  .catch((error) => {
+    errors.report(error);
+  });
+server.listen(port);
 
-server.listen(port, () => {
-  console.log(`listening on port ${port} `);
-});
+server.use(errors.express);

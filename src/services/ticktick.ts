@@ -87,15 +87,10 @@ export default class TicktickClient {
         }
       );
 
-      if (response.status == 200) {
-        console.log("login success");
-        return response.data.token;
-      } else {
-        throw Error();
-      }
-    } catch (e) {
-      console.error(e);
-      throw Error(`invalide email ${email} or password`);
+      console.log("login success");
+      return response.data.token;
+    } catch (error) {
+      throw new Error(`invalide email ${email} or password`);
     }
   }
 
