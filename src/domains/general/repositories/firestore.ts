@@ -35,12 +35,14 @@ export default class Firestore  {
   }
 
   async checkPocket(check: PocketCheck): Promise<void> {
-    await this.client.doc(POCKET).update({
+    const doc = {
       checked: check.checked,
-      highlighIds: check.highlighIds.length
-        ? firestore.FieldValue.arrayUnion(...check.highlighIds)
-        : null,
-    });
+    } as any; // todo fix this
+
+    if (check.highlighIds.length) {
+      doc["highlighIds"] = firestore.FieldValue.arrayUnion(...check.highlighIds);
+    }
+    await this.client.doc(POCKET).update(doc);
   }
 
   async savePocketArticle(articles: pocket_article[]): Promise<void> {
