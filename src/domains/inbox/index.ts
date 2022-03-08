@@ -52,6 +52,7 @@ export default class InboxService extends Service {
     this.storage = new Storage(config.bucket);
 
     this.initRoutes();
+    this.initEvents();
   }
 
   initRoutes() {
