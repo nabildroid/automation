@@ -36,7 +36,7 @@ export default class Wallpaper implements IRoute {
     const result = {
       weeks: scores.map(v=>v.toFixed(4)),
       habits: averange.map(v=>v.toFixed(4)),
-      start: ranks[0]?.date || null,
+      start: new Date("2022/06/27"),
       productivity: Math.floor(ranks.pop()?.ranking || 0),
     };
 
