@@ -52,8 +52,8 @@ server.use((req, res, next) => {
   ) {
     next();
   } else {
-    res.redirect("https://laknabil.notion.site");
-    logger.warning("unauthorized request to " + req.path);
+    res.redirect("https://laknabil.me");
+    logger.warn("unauthorized request to " + req.path);
   }
 });
 
