@@ -1,19 +1,15 @@
 import { firestore } from "firebase-admin";
 import PocketCheck from "../../../core/entities/pocket_check";
-import {
-  anyDateToFirestore,
-  anyFirestoreToDate,
-} from "../../../core/utils";
+import { anyDateToFirestore, anyFirestoreToDate } from "../../../core/utils";
 import pocket_article from "../models/pocket_article";
 
 const BLOG = "/blog/last_update";
 const MODE = "/mode/";
 
-
 const POCKET = "/general/pocket";
 const POCKET_ARTICLES = "/pocket_articles";
 
-export default class Firestore  {
+export default class Firestore {
   private readonly client: firestore.Firestore;
   constructor(client: firestore.Firestore) {
     this.client = client;
@@ -92,6 +88,4 @@ export default class Firestore  {
       return new Date("1970 01 01");
     }
   }
-
-
 }

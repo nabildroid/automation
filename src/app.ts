@@ -1,7 +1,7 @@
 import { Express } from "express";
 import { Bucket } from "@google-cloud/storage";
 import winston from "winston";
-
+import fs from "fs";
 import AppConfig from "./core/entities/app_config";
 import Firestore from "./core/repositories/firestore";
 import TicktickClient from "./services/ticktick";
@@ -99,6 +99,18 @@ export default class App {
       firestore,
       ticktick: ticktickClient,
     });
+
+    firestore
+      .collection("/ticktick_ranking")
+      .get()
+      .then((d) => {
+        const items = d.docs.map((d) => ({
+          ...d.data(),
+          date:d.id,
+        }));
+
+        fs.writeFileSync("ticktick_ranking.json", JSON.stringify(items));
+      });
 
     console.log(`#${this.config.title} has been initiated`);
   }
