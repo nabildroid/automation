@@ -82,6 +82,8 @@ server.use(async (req, res, next) => {
   }
 });
 
+initialization.then(() => {
 server.listen(port);
+});
 
 server.use(errors.express);
