@@ -19,7 +19,17 @@ export default class Firestore {
   }
 
   async getRanking(): Promise<Ranking[]> {
-    const query = await this.client.collection(RANKING).get();
+    const window = 7 * 7 * 24 * 60 * 60 * 1000; // 7 weeks
+    const query = await this.client
+      .collection(RANKING)
+      .where(
+        "date",
+        ">",
+        anyDateToFirestore({
+          date: new Date(Date.now() - window),
+        }).date
+      )
+      .get();
     return query.docs.map((d) => anyFirestoreToDate(d.data()));
   }
 }
