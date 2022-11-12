@@ -26,7 +26,6 @@ export default class SyncWithPocket implements IRoute {
     const articles = allArticles.slice(0, limit);
     if (!articles.length) return res.send("synced - empty");
 
-    
     const newHighlightIds: string[] = [];
     const promises = articles.map(async (article) => {
       for (const item of article.highlights) {
@@ -70,10 +69,10 @@ export default class SyncWithPocket implements IRoute {
     await this.db.savePocketArticle(articles.filter((a) => a.completed));
     console.log("----------");
 
-    // await this.db.checkPocket({
-    //   checked: articles.length == limit ? articles.pop()!.updated : new Date(),
-    //   highlighIds: newHighlightIds,
-    // });
+    await this.db.checkPocket({
+      checked: articles.length == limit ? articles.pop()!.updated : new Date(),
+      highlighIds: newHighlightIds,
+    });
 
     return res.send("synced");
   }
